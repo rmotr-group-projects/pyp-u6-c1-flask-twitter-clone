@@ -63,3 +63,10 @@ target/
 
 *.db
 .DS_Store
+
+# Virtualenvs
+py2-env/
+py3-env/
+
+# Cloud9
+.~c9*
