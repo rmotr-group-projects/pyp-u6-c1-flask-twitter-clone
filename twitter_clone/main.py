@@ -25,5 +25,34 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@app.route("/login", methods=['POST', 'GET'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    if request.method == 'POST':
+        # check if username in database, not get all users
+        # request.form is dict with all the data from POST
+        # request.form[user], request.form[password]
+
+        cur = g.db.cursor()
+        cur.execute\
+        ('SELECT username, password FROM user' +
+        'WHERE username={0}, password={1}'.\
+        format(request.form['username'], request.form['password']))
+        user = cur.fetchone()
+        '''
+        cursor = g.db.execute + \
+        ('SELECT username, password FROM user' +
+        'WHERE username={0}, password={1}'. \
+        format(request.form['username'], request.form['password']))
+        user = cursor.fetchone()
+        '''
+        if user:
+            return url_for('profile.html', user=user)
+
 
 # implement your views here
+@app.route("/")
+def main():
+    return render_template('profile.html')
