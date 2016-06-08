@@ -65,4 +65,4 @@ target/
 .DS_Store
 
 # Ignore C9 Junk
-*.c9*
+*.~c9*
