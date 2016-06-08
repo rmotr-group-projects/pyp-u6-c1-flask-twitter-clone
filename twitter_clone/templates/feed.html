@@ -26,12 +26,11 @@
             {% for tweet in tweets %}
             <div class="well well-large">
                 
-                <!-- tweet = (u.username, t.id, t.created, t.content) -->
+                <!-- tweet = (u.username, t.id, t.created, t.content, u.id) -->
                 
                 {% if own %}
                 <!-- Delete tweet form -->
-                <!-- TODO: Fix the action url and add a delete method -->
-                <form action="/tweets/27/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                <form action="{{ url_for('delete', t_id=tweet[1]) }}" method="POST">
                     <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
                 </form>
                 {% endif %}

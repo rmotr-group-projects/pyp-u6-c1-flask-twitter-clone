@@ -3,7 +3,7 @@ from hashlib import md5
 from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
-                   flash, url_for)
+                   flash, url_for, abort)
 import datetime
 
 app = Flask(__name__)
@@ -31,6 +31,13 @@ def _date_check(date):
         return datetime.datetime.strptime(date, '%Y-%m-%d')
     except:
         return False
+
+
+def _valid_tweet(tweet):
+    '''
+    Validate the entered tweet data
+    '''
+    return 0 < len(tweet) and len(tweet) <= 140
 
 
 @app.before_request
@@ -113,30 +120,90 @@ def logout():
     
 @app.route('/<username>', methods=['GET', 'POST'])
 def feed(username):
-    # return '<h1>Here we are: Feed!</h1>'
-    # Display the user's twitter feed page.
     
-    # Get all tweet data for this user.
-    # Note: may need to sort this.
-    query = '''SELECT u.username, t.id, t.created, t.content 
+    # Set a default flash type.  This will be used if redirected here
+    #  from an invalid delete and will be overwritten if a tweet is
+    #  posted successfully.
+    flash_type = DANGER
+    
+    # Verify that the user exists, and get the user's id
+    query = 'SELECT id FROM user WHERE username=?'
+    try:
+        cursor = g.db.execute(query, (username,))
+    except:
+        abort(404) # TODO: Customize this?
+    
+    results = cursor.fetchall()
+    u_id = results[0][0]
+    # u_id = cursor.fetchone()[0]
+    
+    # Is the user logged in and viewing their own page?
+    own = 'logged_in' in session and u_id == session['id']
+    
+    # If the user is posting a tweet, validate it and add it.
+    if request.method == 'POST':
+        tweet = request.form['tweet']
+        if not own:
+            flash('You may not tweet from this account')
+        elif not _valid_tweet(tweet):
+            flash('Your tweet was either too short or too long')
+        else:
+            # Add the tweet to the database
+            query = '''INSERT INTO "tweet" ("user_id", "content")
+                VALUES (?, ?);'''
+            g.db.execute(query, (u_id, tweet))
+            g.db.commit()
+            flash('Tweet posted successfully')
+            flash_type = SUCCESS
+            
+    # Get all tweet data for this user
+    # Note: may need to sort this?
+    query = '''SELECT u.username, t.id, t.created, t.content, u.id 
         FROM user as u INNER JOIN tweet as t
-        WHERE u.username=? AND u.id=t.user_id;'''
+        ON u.id=t.user_id
+        WHERE u.username=?
+        ORDER BY t.created DESC;'''
     cursor = g.db.execute(query, (username,))
     tweets = cursor.fetchall()
     
-    # Is the user logged in and viewing their own page?
-    own = ('logged_in' in session and username == session['username'])
-    
-    if request.method == 'POST':
-        if tweet in request.form:
-            # Add tweet to db
-            pass
-        else:
-            # Redirect to delete
-            pass
-    
-    return render_template('feed.html', own=own, tweets=tweets)
+    # Display the user's twitter feed page
+    return render_template('feed.html', own=own, tweets=tweets, flash_type=flash_type)
 
+@app.route('/tweets/<t_id>/delete', methods=['POST'])
+@login_required
+def delete(t_id):
+    
+    # Get information about the tweet to be deleted
+    query = '''SELECT t.user_id, u.username
+        FROM tweet AS t INNER JOIN user AS u 
+        ON t.user_id=u.id
+        WHERE t.id=?;'''
+    
+    # If the tweet id given is not valid or no such tweet exists, return a 404
+    try:
+        cursor = g.db.execute(query, (t_id,))
+        results = cursor.fetchone()
+        assert results
+    except:
+        abort(404) # TODO: Customize this?
+    
+    # Determine whose tweet is being deleted
+    u_id = results[0]
+    username = results[1]
+    
+    # Verify that the authenticated user is deleting his own tweet
+    if u_id != session['id']:
+        flash('''You can't just go around deleting other people's tweets!
+            How would you feel if someone deleted one of your tweets?''')
+    
+    # Delete the tweet
+    else:
+        query = '''DELETE FROM tweet WHERE id=?;'''
+        g.db.execute(query, (int(t_id),))
+        g.db.commit()
+        
+    # Redirect to the user's feed
+    return redirect(url_for('feed', username=username))
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -169,7 +236,8 @@ def profile():
             fn = request.form['first_name'] or fn
             ln = request.form['last_name'] or ln
             dob = request.form['birth_date'] or dob
-            cursor = g.db.execute(query, (fn, ln, dob, str(session['id'])))
+            g.db.execute(query, (fn, ln, dob, str(session['id'])))
+            g.db.commit()
             
             flash('Updated')
 

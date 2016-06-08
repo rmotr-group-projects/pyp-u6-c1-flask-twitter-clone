@@ -1,6 +1,6 @@
--- sqlite3 twitter.db < twitter-schema.sql
+-- sqlite3 database.db < twitter-schema.sql
 
-PRAGMA foreign_keys = ON;
+-- PRAGMA foreign_keys = ON;
 
 -- DROP TABLE if exists user;
 -- CREATE TABLE user (
@@ -35,7 +35,6 @@ PRAGMA foreign_keys = ON;
 -- INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Testing twitter clone");
 -- INSERT INTO "tweet" ("user_id", "content") VALUES (11, "My name is Ivan and I think this is so awesome");
 -- INSERT INTO "tweet" ("user_id", "content") VALUES (10, "My name is Ivan and I am testing twitter clone");
--- SELECT * FROM tweet;
-INSERT INTO "tweet" ("user_id", "content") VALUES (11, "My name is Ivan and I think this is so awesome");
-INSERT INTO "tweet" ("user_id", "content") VALUES (11, "My name is Ivan and I am testing twitter clone");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (11, "My name is Ivan and I think this is so awesome");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (11, "My name is Ivan and I am testing twitter clone");
 SELECT * FROM tweet;
