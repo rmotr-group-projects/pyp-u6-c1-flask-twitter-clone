@@ -128,7 +128,12 @@ def feed(username):
     own = ('logged_in' in session and username == session['username'])
     
     if request.method == 'POST':
-        pass
+        if tweet in request.form:
+            # Add tweet to db
+            pass
+        else:
+            # Redirect to delete
+            pass
     
     return render_template('feed.html', own=own, tweets=tweets)
 
