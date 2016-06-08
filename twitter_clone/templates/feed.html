@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+        
+        {% if own %}
+            <!-- New tweet form -->
+            <div class="row">
+                <form role="form" action="" method="POST">
+        		  <div class="form-group">
+                    <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
+        		  </div>
+        		  <button type="submit" class="btn btn-info pull-right">Submit</button>
+        		</form>
+            </div>
+        {% endif %}
+        
+        <div class="row">
+            
+            <!-- Tweet list -->
+            
+            {% for tweet in tweets %}
+            <div class="well well-large">
+                
+                <!-- tweet = (u.username, t.id, t.created, t.content) -->
+                
+                {% if own %}
+                <!-- Delete tweet form -->
+                <!-- TODO: Fix the action url and add a delete method -->
+                <form action="/tweets/27/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+                {% endif %}
+            
+                <!-- Display tweet div -->
+                <div>
+                    <strong>@{{ tweet[0] }}</strong>
+                    <span class="label label-primary">{{ tweet[2] }}</span>
+                </div>
+                <div>{{ tweet[3] }}</div>
+                
+            </div>
+            {% endfor %}
+            
+        </div>
+        
+    </div>
+    <div class="col-sm-2"></div>
+</div>
+
+{% endblock %}

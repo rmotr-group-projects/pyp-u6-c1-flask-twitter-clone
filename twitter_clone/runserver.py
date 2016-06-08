@@ -1,6 +1,8 @@
 
 import os
 
+# from main import app
+# import settings
 from twitter_clone.main import app
 from twitter_clone import settings
 
