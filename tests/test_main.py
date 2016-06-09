@@ -25,13 +25,14 @@ class BaseTwitterCloneTestCase(unittest.TestCase):
         self.client = app.test_client()
 
     def load_fixtures(self):
+        passwd = '1234'.encode('utf-8')
         with open(os.path.join(settings.BASE_DIR, 'twitter-schema.sql'), 'r') as f:
             sql_query = f.read()
         for statement in sql_query.split(';'):
             self.db.execute(statement)
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (1, "testuser1", "{}");'.format(md5('1234').hexdigest()))
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (2, "testuser2", "{}");'.format(md5('1234').hexdigest()))
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (3, "testuser3", "{}");'.format(md5('1234').hexdigest()))
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (1, "testuser1", "{}");'.format(md5(passwd).hexdigest()))
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (2, "testuser2", "{}");'.format(md5(passwd).hexdigest()))
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (3, "testuser3", "{}");'.format(md5(passwd).hexdigest()))
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (1, "Tweet 1 testuser1");')
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (1, "Tweet 2 testuser1");')
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (2, "Tweet 1 testuser2");')
@@ -224,3 +225,5 @@ class TweetsTestCase(BaseTwitterCloneTestCase):
     def test_delete_tweet_invalid_id(self):
         response = self.client.post('/tweets/invalid/delete')
         self.assertEqual(response.status_code, 404)
+
+# unittest.main()
