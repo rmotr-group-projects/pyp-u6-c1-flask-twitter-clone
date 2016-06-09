@@ -162,10 +162,11 @@ def feed(username):
     query = 'SELECT id FROM user WHERE username=?'
     try:
         cursor = g.db.execute(query, (username,))
+        results = cursor.fetchall()
+        assert results
     except:
         abort(404) # TODO: Customize this?
     
-    results = cursor.fetchall()
     u_id = results[0][0]
     
     # Is the user logged in and viewing their own page?
