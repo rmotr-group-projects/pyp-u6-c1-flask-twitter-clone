@@ -60,6 +60,7 @@ def base():
     '''
     Redirect user to login page.
     '''
+    
     # If not logged in, redirect to login page
     if 'logged_in' not in session:
         return redirect(url_for('login'))
@@ -142,11 +143,8 @@ def logout():
     Log out the user and redirect to the login page.
     Alternatively, could redirect to the frontpage (user feed)
     '''
-    session.pop('logged_in', None)
-    session.pop('username', None)
-    session.pop('user_id', None)
+    session.clear()
     flash('You were logged out')
-    # return redirect(url_for('login'))
     return redirect(url_for('base'))
     
     
@@ -202,7 +200,7 @@ def feed(username):
     return render_template('feed.html', own=own, tweets=tweets, flash_type=flash_type)
 
 @app.route('/tweets/<t_id>/delete', methods=['POST'])
-# @login_required
+# @login_required  # Replaced by code on lines 223 - 225
 def delete(t_id):
     
     # Get information about the tweet to be deleted
@@ -215,9 +213,6 @@ def delete(t_id):
     try:
         cursor = g.db.execute(query, (t_id,))
         results = cursor.fetchall()
-        # from pprint import pprint
-        # print('Invalid results:')
-        # pprint(results)
         assert results
     except:
         abort(404) # TODO: Customize this?
@@ -282,3 +277,84 @@ def profile():
             flash('Updated')
 
     return render_template('profile.html', user=user, fname=fn, lname=ln, dob=dob, flash_type=flash_type)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    '''
+    Register a new user, validate registration information, and store user in
+    database.
+    '''
+    
+    # If a user is logged in, return to the base page
+    if 'logged_in' in session:
+        return redirect(url_for('base'))
+    
+    # Display messages for possible entry and validation errors
+    UN_ERROR = 'The username you chose has already been registered.  \
+        Please select a different username.'
+    PW_ERROR = 'The passwords entered do not match each other.'
+    DOB_ERROR = 'The date of birth you entered is in an invalid format.  \
+        Please enter your date of birth in the form "YYYY-MM-DD".'
+    
+    # Use placeholder values in the registration template
+    if request.method == 'GET':
+        user = fname = lname = dob = ''
+    
+    # Validate entered data.  If validation passes, store the new user and
+    #  redirect to the login screen.  If it fails, remain on the registration
+    #  page, with any valid values still in the form.
+    if request.method == 'POST':
+        valid = True
+        
+        # See if the username has been used already
+        query = 'SELECT * FROM user WHERE username=?;'
+        cursor = g.db.execute(query, (request.form['username'],))
+        results = cursor.fetchall()
+        if results:
+            valid = False
+            flash(UN_ERROR)
+            user = ''
+        else:
+            user = request.form['username']
+        
+        # Validate the password
+        if request.form['password1'] != request.form['password2']:
+            valid = False
+            flash(PW_ERROR)
+        pw = _hash_password(request.form['password1'])
+        
+        # Validate the birthdate format
+        if request.form['birth_date'] and not _date_check(request.form['birth_date']):
+            valid = False
+            flash(DOB_ERROR)
+            dob = ''
+        else:
+            dob = request.form['birth_date']
+        
+        # Get names out of the form
+        fname = request.form['first_name']
+        lname = request.form['last_name']
+        
+        # If validation passes, store the new user and go to the login page
+        if valid:
+            
+            # Store user data in database
+            query = '''INSERT INTO user
+            (username, password, first_name, last_name, birth_date)
+            VALUES (?, ?, ?, ?, ?);'''
+            print(user)
+            g.db.execute(query, (user, pw, fname, lname, dob))
+            g.db.commit()
+            
+            # Send the user to the login page
+            return redirect(url_for('login'))
+            
+    # Remain on the register page
+    return render_template(
+        'register.html',
+        user=user,
+        fname=fname,
+        lname=lname,
+        dob=dob,
+        flash_type=DANGER
+    )

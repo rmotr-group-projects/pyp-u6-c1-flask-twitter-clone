@@ -26,8 +26,10 @@
       <ul class="nav navbar-nav navbar-right">
 
               {% if session.logged_in %}
-                <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> {{session.username}}</a></li>
-                <li><a href="/logout?next=%2Fprofile"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+                <li><a href="{{ url_for('profile') }}"><i class="fa fa-user" aria-hidden="true"></i> {{session.username}}</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+              {% else %}
+                <li><a href="{{ url_for('register') }}"><i class="fa fa-user-plus" aria-hidden="true"></i> Register</a></li>
               {% endif %}
 
       </ul>
