@@ -1,5 +1,5 @@
 import sqlite3
-from hashlib import md5
+from hashlib import md5         #hash function
 from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
@@ -41,62 +41,70 @@ def login_required(f):
 
 # implement your views here
 @app.route("/")
-def home():
+def index():
     return redirect(url_for('login'))
-    
+
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     error = None
-    '''
     if request.method == 'GET':
+        if 'username' in session:
+            flash('You are already logged in')
+            return redirect(url_for('own_feed')) #might need to pull username from db to pass to own_feed func
         return render_template('login.html')
-    '''
     if request.method == 'POST':
-        # check if username in database, not get all users
         # request.form is dict with all the data from POST
-        # request.form[user], request.form[password]
-        cur = g.db.execute('SELECT username, password FROM user WHERE username=?'\
+        cur = g.db.execute('SELECT id, username, password FROM user WHERE username=?'\
         ,(request.form['username'],))
         user = cur.fetchone()
         if user:
-            if request.form['password'] != user[1]:
-                error = 'Invalid password'
+            password_hash = md5(request.form['password'].encode('utf-8')).hexdigest()
+            if password_hash != user[2]:
+                flash('Invalid username or password')
+                return redirect(url_for('login'))
             else:
-                session['username'] = user[0]
-                return redirect(url_for('own_feed'))
-                #return render_template('own_feed.html')
+                session['user_id'] = user[0]
+                session['username'] = user[1]
+                flash('Login successful')
+                return redirect(url_for('own_feed', username = user[1]))
         else:
-            error = 'Invalid username'
-        return error
-    return render_template('login.html')
-        
-        
-    '''
-        cur = g.db.execute\
-        ('SELECT username, password FROM user'\
-        'WHERE username={0}, password={1}'.\
-        format(request.form['username'], request.form['password']))
-        user = cursor.fetchone()
-        
-        
-        if user:
-            return url_for('profile.html', user=user)
-    '''
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
 
-@app.route('/logout') #add variable username
-@login_required
-def logout():
-    pass
 
-@app.route('/own_feed') #add variable username
+@app.route('/logout/<username>') #add variable usernames
+def logout(username):
+    session.pop('username')
+    flash('Logout successful')
+    return redirect(url_for('login'))
+    
+
+@app.route('/profile', methods=['POST', 'GET'])
+
+
+@app.route('/tweets/<username>', methods=['POST', 'GET'])
 @login_required
-def own_feed():
+def own_feed(username):
     
     pass
     
 
+@app.route('/other_feed')
+@login_required
+def other_feed():
+    render_template('other_feed.html')
 
-
+@app.route('/tweets/<tweet-id>/delete', methods=['POST'])
+@login_required
+def delete_tweet():
+    cur = g.db.execute('SELECT * from tweet where user_id=?', (session['user_id'],))
+    if len(cur.fetchall()) < 2:
+        flash("Sorry, you must have at least two tweets in order to delete one.")
+        return redirect(url_for('own_feed'))
+    
+    cur = g.db.execute('DELETE FROM tweet WHERE id=?',(request.form['tweet-id'],))
+    flash("Tweet deleted successfully.")
+    return redirect(url_for('own_feed'))
 
 
