@@ -84,7 +84,10 @@ def user_feed(username):
         
     if request.method == 'POST':
         if own_feed:
-            pass # be able to post new tweets or delete tweets
+            g.db.execute('INSERT INTO tweet (user_id, content) VALUES (:user_id, :tweet)', {'user_id': session['user_id'], 'tweet': request.form['tweet']})
+            g.db.commit()
+            tweets = query_db('select * from tweet where user_id = ?', [session['user_id']])
+            return render_template('feed.html', username=username, own_feed=own_feed, tweets=tweets)
         else: #other users
             return redirect(url_for('index'), code=403)
 #     # return other_feed.html
