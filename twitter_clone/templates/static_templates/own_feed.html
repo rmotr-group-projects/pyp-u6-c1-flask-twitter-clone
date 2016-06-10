@@ -28,6 +28,8 @@
             {% if logged_in %}
                 <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> {{ username }}</a></li>
                 <li><a href="/logout?next=%2F{{username}}"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+            {% else %}
+                <li><a href="/logout?next=%2F{{username}}"><i class="fa fa-sign-out" aria-hidden="true"></i> Log in</a></li>
             {% endif %}
       </ul>
     </div>
@@ -56,7 +58,7 @@
 
             <div class="well well-large">
                 {% if own_tweets %}
-                    <form action="/tweets/27/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <form action="/tweets/{{tweet['tweet_id']}}/delete?next=http://localhost:8080/{{tweet['username']}}" method="POST">
                         <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
                     </form>
                 {% endif %}
