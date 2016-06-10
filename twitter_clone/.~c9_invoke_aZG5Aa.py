@@ -73,8 +73,8 @@ def logout():
 
 @app.route('/<user>', methods = ['POST', 'GET'])
 def user_profile(user):
-
-    if request.method == 'POST' :
+    #g.db.execute("INSERT INTO tweet (content) VALUES (?)", (tweet_content,))
+ and
         if "username" in session and session["username"] == user:
             tweet_content = request.form['tweet']
             user_id = session["user_id"]
@@ -88,13 +88,9 @@ def user_profile(user):
     if content is None:
         return "User does not exist"
     elif "username" in session and session["username"] == user:
-        own_tweets=True
-        username = session["username"]
+        return render_template("static_templates/own_feed.html", tweets=content, ow)
     else:
-        username = ""
-        own_tweets=False
-        
-    return render_template("static_templates/own_feed.html", tweets=content, own_tweets=own_tweets, username=username, logged_in = "username" in session)
+        return render_template("static_templates/user_tweets.html", tweets=content, user=user)
     
 
 def get_user_content(user):

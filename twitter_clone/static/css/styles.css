@@ -1,2 +1,10 @@
 div.body-container { margin-top: 80px; }
 div.row { margin-bottom: 15px; }
+
+#error {
+    color: red;
+}
+
+#cont {
+    margin-top:100px;
+}
