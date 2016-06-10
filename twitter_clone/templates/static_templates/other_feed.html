@@ -41,55 +41,21 @@
 
 
         <div class="row">
-
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:42:45</span>
-                </div>
-                <div>sdfasdf</div>
-
-
-            </div>
+         {% for tweet in tweets %}
 
             <div class="well well-large">
 
 
                 <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:41:44</span>
+                    <strong>@{{ username }}</strong>
+                    <span class="label label-primary">{{ tweet[2] }}</span>
                 </div>
-                <div>sdfasdfadsf</div>
+                <div>{{ tweet[3] }}</div>
 
 
             </div>
+        {% endfor %}
 
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:36</span>
-                </div>
-                <div>dfgfdgdfg</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:20</span>
-                </div>
-                <div>kjasdhjaskdh</div>
-
-
-            </div>
 
 
         </div>
