@@ -68,14 +68,19 @@ def index():
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def user_feed(username):
-    print(session)
-    own_feed = username == session['username']
+    if session:
+        own_feed = username == session['username']
+    else:
+        own_feed = False
     
     if request.method == 'GET':
         if own_feed:
-            return render_template('static_templates/own_feed.html/')
-        else: #other users and non-users
-            return render_template('static_templates/other_feed.html/')
+            tweets = query_db('select * from tweet where user_id = ?', [session['user_id']])
+            return render_template('feed.html', username=username, own_feed=own_feed, tweets=tweets)
+        else:
+            usr_id = g.db.execute('select id from user where username = ?', [username]).fetchone()[0]
+            tweets = query_db('select * from tweet where user_id = ?', [usr_id]) 
+            return render_template('feed.html', username=username, own_feed=own_feed, tweets=tweets)
         
     if request.method == 'POST':
         if own_feed:
@@ -102,15 +107,30 @@ def user_feed(username):
 # 
 #     pass
 
-# @app.route('/profile')
-# def user_profile():
+@app.route('/profile', methods = ['GET','POST'])
+@login_required
+def user_profile():
 # check if user logged in
+# updates all info for profile, then sends to db
+    if request.method == 'POST':
+        try:
+            new_user = request.form['username']
+            new_first = request.form['first_name']
+            new_last = request.form['last_name']
+            new_bday = request.form['birth_date']
+            # can probably reformat and make less than 80 the next line
+            g.db.execute('UPDATE user SET username = ?, first_name = ?, last_name = ?, birth_date = ? WHERE id = ?',
+            [new_user, new_first, new_last, new_bday, session['user_id']])
+            g.db.commit()
+            flash('Profile updated correctly.')
+        except:
+            flash('Profile not updated.')
+            
 # return profile.html
+# need dynamic html page to return new information
 # has html form containg all current info from db:
 #   user, first, last, birthdate
-# can change all info
-# if post, then apply new info to DB if auth
-# render the page with new info
+# render the page with new info  # TODO make new dynamic page 
 #     pass
 
 # @app.route('/tweets/<int:id (tweet table)>/delete')
