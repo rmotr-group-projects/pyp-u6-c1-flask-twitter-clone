@@ -129,8 +129,6 @@ def login():
         if 'user_id' in session:
             session['logged_in'] = True
             session['username'] = username
-            flash('You were logged in')
-            # return redirect(url_for('feed', username=username))
             return redirect(url_for('base'))
         
         # Display an error and remain on login page
@@ -339,11 +337,15 @@ def register():
         if valid:
             
             # Store user data in database
-            query = '''INSERT INTO user
-            (username, password, first_name, last_name, birth_date)
-            VALUES (?, ?, ?, ?, ?);'''
-            print(user)
-            g.db.execute(query, (user, pw, fname, lname, dob))
+            query = '''INSERT INTO user 
+                (username, password, first_name, last_name'''
+            if dob:
+                query += ', birth_date) VALUES (?, ?, ?, ?, ?);'
+                user_data = (user, pw, fname, lname, dob)
+            else:
+                query += ') VALUES (?, ?, ?, ?);'
+                user_data = (user, pw, fname, lname)
+            g.db.execute(query, user_data)
             g.db.commit()
             
             # Send the user to the login page
