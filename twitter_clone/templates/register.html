@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <form role="form" action="" method="POST">
+		  <div class="form-group">
+		    <label for="username">Username</label>
+		    <input class="form-control" name="username" placeholder="Username" value="{{ user }}" >
+		  </div>
+		  <div class="form-group">
+		    <label for="password1">Password</label>
+		    <input class="form-control" name="password1" type="password" placeholder="Password">
+		  </div>
+  		  <div class="form-group">
+		    <label for="password2">Re-enter Password</label>
+		    <input class="form-control" name="password2" type="password" placeholder="Password">
+		  </div> 
+		  <div class="form-group">
+		    <label for="first_name">First Name</label>
+		    <input class="form-control" name="first_name" placeholder="First Name" value="{{ fname }}" >
+		  </div>
+		  <div class="form-group">
+		    <label for="last_name">Last Name</label>
+		    <input class="form-control" name="last_name" placeholder="Last Name" value="{{ lname }}" >
+		  </div>
+		  <div class="form-group">
+		    <label for="birth_date">Date of Birth</label>
+		    <input class="form-control" name="birth_date" placeholder="YYYY-MM-DD" value="{{ dob }}" >
+		  </div>
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+    </div>
+</div>
+
+{% endblock %}

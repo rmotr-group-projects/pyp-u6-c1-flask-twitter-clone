@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <form role="form" action="" method="POST">
+		  <div class="form-group">
+		    <label for="username">Username</label>
+		    <input class="form-control" name="username" placeholder="{{ user }}" readonly >
+		  </div>        
+		  <div class="form-group">
+		    <label for="first_name">First name</label>
+		    <input class="form-control" name="first_name" placeholder="{{ fname }}" >
+		  </div>
+		  <div class="form-group">
+		    <label for="last_name">Last name</label>
+		    <input class="form-control" name="last_name" placeholder="{{ lname }}" >
+		  </div>
+		  <div class="form-group">
+		    <label for="birth_date">Birth date</label>
+		    <input class="form-control" name="birth_date" placeholder="{{ dob }}" >
+		  </div>
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+    </div>
+</div>
+
+{% endblock %}
