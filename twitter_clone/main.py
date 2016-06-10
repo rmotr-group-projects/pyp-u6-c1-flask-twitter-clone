@@ -64,6 +64,7 @@ def logout():
 @app.route('/')
 @login_required
 def index():
+    # TODO: We need to make thise page dynamic
     return render_template('static_templates/own_feed.html/')
 
 @app.route('/<username>', methods=['GET', 'POST'])
@@ -90,31 +91,10 @@ def user_feed(username):
             return render_template('feed.html', username=username, own_feed=own_feed, tweets=tweets)
         else: #other users
             return redirect(url_for('index'), code=403)
-#     # return other_feed.html
-
-# Needs GET and POST support
-
-#build dynamic templates
-
-# if not a session
-# you can just see the tweets
-# should query db for username and post all tests in descending order creation date
-
-# if it's your page( and logged in/session)
-# form to post new tweets
-# button to delete linked tweets
-
-# if method is post
-#   add the new tweet to the db
-#   reload the page render page w/ new db pull with new tweet
-# 
-#     pass
 
 @app.route('/profile', methods = ['GET','POST'])
 @login_required
 def user_profile():
-# check if user logged in
-# updates all info for profile, then sends to db
     if request.method == 'POST':
         try:
             new_user = request.form['username']
@@ -129,6 +109,10 @@ def user_profile():
         except:
             flash('Profile not updated.')
             
+    usr_info = g.db.execute('select * from user where username = ?', [session['username']]).fetchone()
+    print(usr_info)
+    return render_template('profile.html', usr_info=usr_info)
+        
 # return profile.html
 # need dynamic html page to return new information
 # has html form containg all current info from db:
