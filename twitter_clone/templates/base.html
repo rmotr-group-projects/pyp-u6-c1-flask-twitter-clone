@@ -13,14 +13,13 @@
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 <ul class=flashes>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
             {% endif %}
         {% endwith %}
         <div class="container body-container">
-
             <nav class="navbar navbar-default navbar-fixed-top">
   <div class="container">
     <div class="navbar-header">
@@ -34,8 +33,16 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
+            
+            {% if g.username != None %}
+            <li><a href="/profile">{{ g.username }}</a></li>
+            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i>{{ g.username }}</a></li>
 
+            <li><a href="/logout?next=%2Fprofile"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+
+            {% else %}
             <li><a href="/login?next=%2Flogin"><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
+            {% endif %}
 
       </ul>
     </div>
