@@ -50,6 +50,25 @@
     </div>
 </div>
 
+{% if error %}
+    <div class="row" id="error">
+        <div class="col-md-12">
+            <h3>{{error}}</h3>
+        </div>
+    </div>
+    
+{% endif %}
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+        <li>{{ message | safe }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
         </div>
     </body>
 
