@@ -29,15 +29,22 @@ def login_required(f):
 
 
 # implement your views here
-@app.route("/", methods=["GET", 'POST'])
+@app.route("/", methods=["GET"])
+def index():
+    #check if logged in
+    if "username" in session and session["username"]:
+        return redirect("/{}".format(session["username"]))
+    return redirect(url_for("login"))
+
+
+
 @app.route("/login", methods=["GET", 'POST'])
 def login():
     if request.method == 'POST':
         return authenticate(request.form["username"], request.form["password"])
-
     else:
-        if "logged_in" in session and session["logged_in"] == True:
-            return redirect(url_for("profile"))
+        """if "logged_in" in session and session["logged_in"] == True:
+            return redirect(url_for("index"))"""
         return render_template('/static_templates/login.html')
     
 def authenticate(username, password):
@@ -53,18 +60,20 @@ def authenticate(username, password):
             #Take advantage of the global variable session, to store some user-related stuff that's gonna be useful
             session["logged_in"] = True
             session["username"] = user[1]
-            session["userid"] = user[0]
+            session['user_id'] = user[0]
             #redirect
-            return redirect(url_for("own"))
+            return redirect("/{}".format(session["username"]))
+        else:
+            return "Invalid password"
     else:
-        return "you shall not pass"
+        return "Invalid username or password"
         
     
 #Lets have a logout function that handles clicks to the logout button
 @app.route("/logout")
 def logout():
     session["username"] = ""
-    session["userid"] = ""
+    session['user_id'] = ""
     session["logged_in"] = False
     return redirect(url_for("login"))
 
@@ -87,19 +96,19 @@ def delete(id): #I changed this from tweet_id to just id, to comply with the cha
         conn.commit() #We were missing a commit call
     
         """After deletion, redirect back to the tweet feed """
-        return redirect(url_for("own"))
+        return redirect("/{}".format(session["username"]))
     else:
         abort(404)
 
 
 
-@app.route("/own", methods =["GET","POST"])
+@app.route("/<username>", methods =["GET","POST"])
 @login_required
-def own():
+def own(username):
     if request.method == "GET":
         conn = connect_db(db_name)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM tweet where user_id = ?", (session["userid"], ) ) #Take advantage of the userid entry we stored in global session
+        cursor.execute("SELECT * FROM tweet where user_id = ?", (session['user_id'], ) ) #Take advantage of the userid entry we stored in global session
         tweets = cursor.fetchall()
         return render_template('static_templates/own_feed.html', tweets=tweets)
     else:
@@ -107,15 +116,15 @@ def own():
             conn = connect_db(db_name) #Connect to DB
             cursor = conn.cursor()
             current_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            cursor.execute("INSERT into tweet(user_id, created, content) VALUES(?, ?, ?)", (session["userid"], current_date, request.form["tweet"]))
+            cursor.execute("INSERT into tweet(user_id, created, content) VALUES(?, ?, ?)", (session['user_id'], current_date, request.form["tweet"]))
             conn.commit()
         #refresh page
-        return redirect(url_for("own"))
+        return redirect("/{}".format(session["username"]))
         
 @app.route("/other/<username>")
 def get_feed(username):
     if username == session["username"]:
-        return redirect(url_for("own"))
+        return redirect("/{}".format(session["username"]))
     else:
         conn = connect_db(db_name)
         cursor = conn.cursor()
@@ -126,18 +135,20 @@ def get_feed(username):
         othertweets = cursor.fetchall()
         return render_template('static_templates/other_feed.html', tweets=othertweets, username=username)
 
+
 @app.route("/profile", methods=["GET", "POST"])
+@login_required
 def profile():
     if request.method == "GET":
         conn = connect_db(db_name)
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM user WHERE id = ?", (session["userid"], ))
+        cursor.execute("SELECT * FROM user WHERE id = ?", (session['user_id'], ))
         user = cursor.fetchone()
         return render_template('/static_templates/profile.html', user=user)
     else:
         conn = connect_db(db_name) #Connect to DB
         cursor = conn.cursor()
-        cursor.execute("UPDATE user SET first_name=?, last_name=?, birth_date=? WHERE id=?", (request.form["first_name"], request.form["last_name"], request.form["birth_date"], session["userid"]))
+        cursor.execute("UPDATE user SET first_name=?, last_name=?, birth_date=? WHERE id=?", (request.form["first_name"], request.form["last_name"], request.form["birth_date"], session['user_id']))
         conn.commit()
         return redirect(url_for("profile"))
     
