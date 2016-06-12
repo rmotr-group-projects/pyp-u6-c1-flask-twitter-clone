@@ -7,7 +7,7 @@ import sqlite3
 from hashlib import md5         
 from functools import wraps
 from flask import Flask, json
-from flask import (g, request, session, redirect, render_template, flash,                 url_for)
+from flask import g, request, session, redirect, render_template, flash, url_for
 
 
 app = Flask(__name__)

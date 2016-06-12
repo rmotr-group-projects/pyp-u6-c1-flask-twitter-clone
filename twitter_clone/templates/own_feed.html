@@ -20,26 +20,10 @@
         <div class="row">
 
 <!-- generated content -->
-            <!--<div class="well well-large">-->
 
-            <!--    <form action="/tweets/7/delete?next=http://localhost:8080/martinzugnoni" method="POST">-->
-            <!--        <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>-->
-            <!--    </form>-->
-
-
-            <!--    <div>-->
-            <!--        <strong>@martinzugnoni</strong>-->
-            <!--        <span class="label label-primary">2016-06-07 01:09:26</span>-->
-            <!--    </div>-->
-            <!--    <div>Even more testing...</div>-->
-
-
-            <!--</div>-->
-
-                 <!--<div>-->
                  
                         <!-- need to get tweet number and proper URL to construct this.
-                        Problen is that action= wants a string immediately, so formatting a string
+                        Problem is that action= wants a string immediately, so formatting a string
                         it thinks that the first curly bracket is a string, and same problem with 
                         setting a variable.-->
                     {% for item in tweets %}
@@ -54,7 +38,7 @@
                             <span class="label label-primary">{{item["created"]}}</span>
                         </div>
                         <div>{{item["content"]}}</div>
-                    <!--</div>-->
+                    </div>
                     {% endfor %}
 
 
@@ -67,22 +51,7 @@
 
 
 
-            <!--{% for tweet in tweets %}-->
-            <!--    <div class="well well-large">-->
-        
-            <!--            <form action="" method="POST">-->
-            <!--                <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>-->
-            <!--            </form>-->
-        
-                        
-            <!--            <div>-->
-            <!--                <strong>@{{ tweet.name }}</strong>-->
-            <!--                <span class="label label-primary">{{ tweet.date }}</span>-->
-            <!--            </div>-->
-            <!--            <div>{{ tweet.content }}</div>-->
-            
-            <!--    </div>-->
-            <!--{% endfor %}-->
+
             
 <!--   
 
