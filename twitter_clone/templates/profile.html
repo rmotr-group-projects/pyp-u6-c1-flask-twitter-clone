@@ -7,19 +7,19 @@
         <form role="form" action="" method="POST">
 		  <div class="form-group">
 		    <label for="username">Username</label>
-		    <input class="form-control" name="username" placeholder="Your username" value="martinzugnoni" readonly>
+		    <input class="form-control" name="username" placeholder="Your username" value={{ data.username }} >
 		  </div>
 		  <div class="form-group">
 		    <label for="first_name">First name</label>
-		    <input class="form-control" name="first_name" placeholder="Your first name" value="Martin">
+		    <input class="form-control" name="first_name" placeholder="Your first name" value={{ data.first_name }}>
 		  </div>
 		  <div class="form-group">
 		    <label for="last_name">Last name</label>
-		    <input class="form-control" name="last_name" placeholder="Your last name" value="">
+		    <input class="form-control" name="last_name" placeholder="Your last name" value={{ data.last_name }}>
 		  </div>
 		  <div class="form-group">
 		    <label for="birth_date">Birth date</label>
-		    <input class="form-control" name="birth_date" placeholder="Your birth date" value="2016-01-26">
+		    <input class="form-control" name="birth_date" placeholder="Your birth date" value={{ data.birth_date }}>
 		  </div>
 		  <button type="submit" class="btn btn-default">Submit</button>
 		</form>

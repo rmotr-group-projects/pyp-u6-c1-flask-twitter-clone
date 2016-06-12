@@ -2,11 +2,13 @@
 /tweets/{{tweet['tweet_id']}}/delete?next=http://fornoodling-bdauer-1.c9users.io/{{tweet['name']}}
 """
 
+
 import sqlite3
-from hashlib import md5         #hash function
+from hashlib import md5         
 from functools import wraps
-from flask import Flask
-from flask import (g, request, session, redirect, render_template, flash, url_for)
+from flask import Flask, json
+from flask import (g, request, session, redirect, render_template, flash,                 url_for)
+
 
 app = Flask(__name__)
 
@@ -42,19 +44,18 @@ def login_required(f):
     return decorated_function
 
 
-# implement your views here
 @app.route('/')
 def index():
-    print "root webpage"
-    return redirect(url_for('login'))
+    if 'username' in session:
+        return redirect(url_for('tweets', username = session['username']))  #this is only a temporary fix; there must be a more eloquent implementation
+    return redirect(url_for('get_login'))
 
 
 @app.route('/login')
 def get_login():
-    #print "in the get_login"
-    #if 'username' in session:
-        #flash('You are already logged in')
-        #return redirect(url_for('login'))
+    if 'username' in session:
+        flash('You are already logged in')
+        return redirect(url_for('index'))
     return render_template('login.html')
 
 
@@ -65,14 +66,16 @@ def login():
     ,(request.form['username'],))
     user = cur.fetchone()
     if user:
-        password_hash = md5(request.form['password']).hexdigest()
-        if password_hash != user[2]:
-            flash('Invalid username or password')
+        pass_hash = md5(request.form['password']).hexdigest()
+        if pass_hash != user[2]:
+            # flash('Invalid username or password')
             return redirect(url_for('login'))
         else:
-            g.user_id = user[0]
-            g.username = user[1]
-            return redirect(url_for('own_feed', username = user[1]))
+            # g.user_id = user[0]
+            # g.username = user[1]
+            session['user_id'] = user[0]
+            session['username'] = user[1]
+            return redirect(url_for('tweets', username = session['username']))
     else:
         flash('Invalid username or password')
         return render_template('login.html')
@@ -81,38 +84,75 @@ def login():
 @app.route('/logout') #add variable usernames
 @login_required
 def logout():
-    session.pop('username')
     session.pop('user_id')
+    session.pop('username')
     flash('Logout successful')
     return redirect(url_for('index'))
     
 
 @app.route('/<username>', methods=['POST', 'GET'])
 def tweets(username):
-    prepared_statement = """
-    select id, user_id, created, content from tweet where
-    user_id='{}'
-    """.format(username)
-    cur = g.db.execute(prepared_statement)
-    tweets = [dict(row(3)) for row in cur.fetchall()]
-    
+    # prepared_statement = """
+    # select id, user_id, created, content from tweet where
+    # user_id='{}'
+    # """.format(session['user_id'])
+    # cur = g.db.execute('select id, user_id, created, content from tweet where user_id=?',(session['user_id'],))
+    # cur = g.db.execute('select tweet.id, tweet.user_id, tweet.created, tweet.content from tweet join user on tweet.user_id = user.id')
+    #cur = g.db.execute('select id from user where username=?',(username,))
+    #user_id = cur.fetchone()[0]
+    cur = g.db.execute('select created, content from tweet where user_id=?', (get_user_id(username),))
+    tweets = [dict(created = row[0], content = row[1]) for row in cur.fetchall()]
+    # js = json.dumps(tweets)
+    # return js
     if 'username' not in session:
-        cur = g.db.execute('SELECT content FROM tweet INNER JOIN user ON'\
-        'tweet.user_id = user.id')
-        tweets = [dict(content=row[0]) for row in cur.fetchall()]
-        return render_template('other_feed.html', username = username)
-        
-    return render_template('own_feed.html')
+        # cur = g.db.execute('SELECT content FROM tweet INNER JOIN user ON'\
+        # 'tweet.user_id = user.id')
+        return render_template('other_feed.html', tweets = tweets, username = username)
+    return render_template('own_feed.html', tweets = tweets, username = username)
 
 
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
 def profile():
-    return render_template('profile.html', username = session['username'])
+    # data = {
+    #     'id':get_user_id(username),
+    #     'first_name':get_first_name(username),
+    #     'last_name':get_last_name(username),
+    #     'birth_date':get_birth_date(username)
+    # }
+    pass
+    # return render_template('profile.html', data=data)
 
+def get_first_name(username):
+    """Get the firstname of the username"""
+    prepared_statement = """
+    select first_name from user where username='{}'
+    """.format(username)
+    return g.db.execute(prepared_statement).fetchone()[0]
 
-
-
+def get_last_name(username):
+    """Get the last name of the username"""
+    prepared_statement = """
+    select last_name from user where username='{}'
+    """.format(username)
+    return g.db.execute(prepared_statement).fetchone()[0]
+    
+def get_birth_date(username):
+    """Get the birth_date of the username"""
+    prepared_statement = """
+    select birth_date from user where username='{}'
+    """.format(username)
+    return g.db.execute(prepared_statement).fetchone()[0]
+    
+def get_user_id(username):
+    if username == 'favicon.ico':
+        return None
+    """Get the userid of the username"""
+    prepared_statement = """
+    select id from user where username="{}"
+    """.format(username)
+    return g.db.execute(prepared_statement).fetchone()[0]
+   
 @app.route('/tweets/<username>', methods=['POST', 'GET'])
 @login_required
 def own_feed(username):
@@ -122,13 +162,6 @@ def own_feed(username):
     tweets = [dict(tweet_id=row[0], name=username, date=row[2], content=row[3]) for row in cur.fetchall()]
     return render_template("own_feed.html", tweets=tweets)
 
-def get_user_id(username):
-    """Get the userid of the username"""
-    prepared_statement = """
-    select id from user where username="{}"
-    """.format(username)
-    return g.db.execute(prepared_statement).fetchone()[0]
-    
 
 @app.route('/other_feed')
 @login_required
