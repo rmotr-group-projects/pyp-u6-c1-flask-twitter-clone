@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import sqlite3
 from hashlib import md5
 from functools import wraps
@@ -35,7 +37,7 @@ def auth_login(usr_name, password):
     if usr is None:
         return False
     else:
-        return md5(password).hexdigest() == usr[1]
+        return md5(password.encode('utf-8')).hexdigest() == usr[1]
 
 # implement your views here
 @app.route('/login', methods=['GET', 'POST'])
