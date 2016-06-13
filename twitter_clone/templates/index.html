@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+
+      <!--  <div class="row">-->
+      <!--      <form role="form" action="" method="POST">-->
+    		<!--  <div class="form-group">-->
+      <!--          <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>-->
+    		<!--  </div>-->
+    		<!--  <button type="submit" class="btn btn-info pull-right">Submit</button>-->
+    		<!--</form>-->
+      <!--  </div>-->
+
+        <div class="row">
+            {% for tweet in tweets %}
+
+            <div class="well well-large">
+                {% if user_id == tweet[1] %}
+                <form action="/tweets/{{tweet['tweet_id']}}/delete?next=http://localhost:8080/{{tweet['username']}}" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+                {% endif %}
+
+                <div>
+                    <strong>@{{ fetch_username(tweet[1]) }}</strong>
+                    <span class="label label-primary">{{ tweet[2] }}</span>
+                </div>
+                <div>{{ tweet[3] }}</div>
+            </div>
+            {% else %}
+            <div> No Tweets here.</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="col-sm-2"></div>
+</div>
+{% endblock %}

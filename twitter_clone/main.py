@@ -13,7 +13,6 @@ app = Flask(__name__)
 def connect_db(db_name):
     return sqlite3.connect(db_name)
 
-
 @app.before_request
 def before_request():
     g.db = connect_db(app.config['DATABASE'][1])
@@ -38,8 +37,11 @@ def auth_login(usr_name, password):
         return False
     else:
         return md5(password.encode('utf-8')).hexdigest() == usr[1]
+        
+def fetch_username(user_id):
+    user_name = g.db.execute('select (username) from user where id = (?);', (user_id,)).fetchone()[0]
+    return user_name
 
-# implement your views here
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -66,8 +68,8 @@ def logout():
 @app.route('/')
 @login_required
 def index():
-    # TODO: We need to make thise page dynamic
-    return render_template('static_templates/own_feed.html/')
+    tweets = query_db('select * from tweet order by created desc;')
+    return render_template('index.html', tweets=tweets, fetch_username=fetch_username)
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def user_feed(username):
@@ -91,7 +93,7 @@ def user_feed(username):
             g.db.commit()
             tweets = query_db('select * from tweet where user_id = ?', [session['user_id']])
             return render_template('feed.html', username=username, own_feed=own_feed, tweets=tweets)
-        else: #other users
+        else:
             return redirect(url_for('index'), code=403)
             
 
@@ -104,7 +106,6 @@ def user_profile():
             new_first = request.form['first_name']
             new_last = request.form['last_name']
             new_bday = request.form['birth_date']
-            # can probably reformat and make less than 80 the next line
             g.db.execute('UPDATE user SET username = ?, first_name = ?, last_name = ?, birth_date = ? WHERE id = ?',
             [new_user, new_first, new_last, new_bday, session['user_id']])
             g.db.commit()
@@ -113,22 +114,14 @@ def user_profile():
             flash('Profile not updated.')
             
     usr_info = g.db.execute('select * from user where username = ?', [session['username']]).fetchone()
-    # print(usr_info)
+    
     return render_template('profile.html', usr_info=usr_info)
-        
-# return profile.html
-# need dynamic html page to return new information
-# has html form containg all current info from db:
-#   user, first, last, birthdate
-# render the page with new info  # TODO make new dynamic page 
-#     pass
 
 @app.route('/tweets/<int:tweet_id>/delete', methods = ['POST'])
 @login_required
 def delete_tweet(tweet_id):
-        
     g.db.execute("DELETE FROM tweet WHERE id = ?;", (tweet_id,))
-    
     g.db.commit()
+    flash('Tweet deleted.')
     
     return redirect(url_for('index'))
