@@ -47,7 +47,7 @@ def login_required(f):
 @app.route('/')
 def index():
     if 'username' in session:
-        return redirect(url_for('tweets', username = session['username']))  #this is only a temporary fix; there must be a more eloquent implementation
+        return redirect(url_for('tweets', username = session['username']))  
     return redirect(url_for('get_login'))
 
 
@@ -86,62 +86,35 @@ def logout():
     flash('Logout successful')
     return redirect(url_for('index'))
     
-    
-# @app.route('/<username>')
-# def get_tweets(username):
-#     if session['username'] == username:
         
-
 @app.route('/<username>', methods=['POST', 'GET'])
 def tweets(username):
     if request.method == 'POST':
-        tweet = request.form['tweet']
-        insert_tweet(username, tweet)
-    cur = g.db.execute('select id, created, content from tweet where user_id=? order by id desc', (get_user_id(username),))
+        if 'username' not in session:
+            return redirect(url_for('index'), code = 403)
+        g.db.execute('INSERT INTO tweet (user_id, content) VALUES (?,?)',(session['user_id'],request.form['tweet']))
+        g.db.commit()
+    cur = g.db.execute('SELECT id, created, content FROM tweet WHERE user_id=? ORDER BY created DESC', (get_user_id(username),))    #should implement join statement
     tweets = [dict(tweet_id = row[0], created = row[1], content = row[2]) for row in cur.fetchall()]
-    if 'username' not in session or username != session['username']:
-        return render_template('other_feed.html', tweets = tweets, username = username)
+    if request.method == 'GET':
+        if 'username' not in session or username != session['username']:
+            return render_template('other_feed.html', tweets = tweets, username = username)
     return render_template('own_feed.html', tweets = tweets, username = username)
 
 
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
 def profile():
-    data = {
-        'id':session['user_id'],
-        'first_name':session['first_name'],
-        'last_name':session['last_name'],
-        'birth_date':session['birth_date']
-    }
-    return render_template('profile.html', data=data)
+    if request.method == 'POST':
+        g.db.execute('UPDATE user SET username=?, first_name=?, last_name=?, birth_date=? WHERE id=?', (request.form['username'], request.form['first_name'], request.form['last_name'], request.form['birth_date'], session['user_id']))
+        g.db.commit()
+        for k,v in request.form.iteritems():
+            session[k] = v
+    return render_template('profile.html')
 
-
-def get_first_name(username):
-    """Get the firstname of the username"""
-    prepared_statement = """
-    select first_name from user where username='{}'
-    """.format(username)
-    return g.db.execute(prepared_statement).fetchone()[0]
-
-
-def get_last_name(username):
-    """Get the last name of the username"""
-    prepared_statement = """
-    select last_name from user where username='{}'
-    """.format(username)
-    return g.db.execute(prepared_statement).fetchone()[0]
-    
-    
-def get_birth_date(username):
-    """Get the birth_date of the username"""
-    prepared_statement = """
-    select birth_date from user where username='{}'
-    """.format(username)
-    return g.db.execute(prepared_statement).fetchone()[0]
-    
     
 def get_user_id(username):
-    if username == 'favicon.ico':
+    if username == 'favicon.ico':       
         return None
     """Get the userid of the username"""
     prepared_statement = """
@@ -149,43 +122,15 @@ def get_user_id(username):
     """.format(username)
     return g.db.execute(prepared_statement).fetchone()[0]
 
-def insert_tweet(username, tweet):
-    """method to insert the tweet for the username"""
-    user_id = get_user_id(username)
-    prepared_statement = """
-    insert into tweet (`user_id`, `content`) values ({}, '{}')
-    """.format(user_id, tweet)
-    g.db.execute(prepared_statement)
-    g.db.commit()
-   
-   
-@app.route('/tweets/<username>', methods=['POST', 'GET'])
-@login_required
-def own_feed(username):
-    prepared_statement = "SELECT id, user_id, created, content from tweet where user_id='{}'".format(get_user_id(username))
-    cur = g.db.execute(prepared_statement)
-    tweets = [dict(tweet_id=row[0], name=username, date=row[2], content=row[3]) for row in cur.fetchall()]
-    return render_template("own_feed.html", tweets=tweets)
-
-
-@app.route('/other_feed')
-@login_required
-def other_feed():
-    render_template('other_feed.html')
-
 
 @app.route('/tweets/<int:tweet_id>/delete', methods=['POST'])
-@login_required #not necessary
+@login_required 
 def delete_tweet(tweet_id):
-    # cur = g.db.execute('SELECT * from tweet where user_id=?', (session['user_id'],))
-    # if len(cur.fetchall()) < 2:
-    #     flash("Sorry, you must have at least two tweets in order to delete one.")
-    #     return redirect(url_for('own_feed')
-    # cur = g.db.execute('DELETE FROM tweet WHERE id=?',(request.form['tweet-id'],))
+    cur = g.db.execute('SELECT * from tweet where user_id=?', (tweet_id,))
+    if len(cur.fetchall()) < 2:
+        flash("Sorry, you must have at least two tweets in order to delete one")
+        return redirect(request.script_root)
     g.db.execute('DELETE FROM tweet WHERE id=?',(tweet_id,))
     g.db.commit()
-    # cur = g.db.execute("SELECT id FROM tweet WHERE id=?",(tweet_id,))
-    # tweet_id = cur.fetchone()
     flash("Tweet deleted successfully")
-    # return str(tweet_id)
     return redirect(request.script_root)
