@@ -91,6 +91,7 @@ def user_feed(username):
             return render_template('feed.html', username=username, own_feed=own_feed, tweets=tweets)
         else: #other users
             return redirect(url_for('index'), code=403)
+            
 
 @app.route('/profile', methods = ['GET','POST'])
 @login_required
@@ -110,7 +111,7 @@ def user_profile():
             flash('Profile not updated.')
             
     usr_info = g.db.execute('select * from user where username = ?', [session['username']]).fetchone()
-    print(usr_info)
+    # print(usr_info)
     return render_template('profile.html', usr_info=usr_info)
         
 # return profile.html
@@ -120,6 +121,12 @@ def user_profile():
 # render the page with new info  # TODO make new dynamic page 
 #     pass
 
-# @app.route('/tweets/<int:id (tweet table)>/delete')
-# def delete_tweet():
-    # pass
+@app.route('/tweets/<int:tweet_id>/delete', methods = ['POST'])
+@login_required
+def delete_tweet(tweet_id):
+        
+    g.db.execute("DELETE FROM tweet WHERE id = ?;", (tweet_id,))
+    
+    g.db.commit()
+    
+    return redirect(url_for('index'))

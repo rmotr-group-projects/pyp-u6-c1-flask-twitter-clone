@@ -25,7 +25,7 @@
 
             <div class="well well-large">
                 {% if own_feed %}
-                <form action="/tweets/27/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                <form action="/tweets/{{tweet['tweet_id']}}/delete?next=http://localhost:8080/{{tweet['username']}}" method="POST">
                     <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
                 </form>
                 {% endif %}
