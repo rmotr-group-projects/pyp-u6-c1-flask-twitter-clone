@@ -61,20 +61,18 @@ def get_login():
 
 @app.route('/login', methods=['POST'])
 def login():
-    # request.form is dict with all the data from POST
-    cur = g.db.execute('SELECT id, username, password FROM user WHERE username=?'\
+    cur = g.db.execute('SELECT id, username, password, first_name, last_name, birth_date FROM user WHERE username=?'\
     ,(request.form['username'],))
     user = cur.fetchone()
     if user:
         pass_hash = md5(request.form['password']).hexdigest()
         if pass_hash != user[2]:
-            # flash('Invalid username or password')
+            flash('Invalid username or password')
             return redirect(url_for('login'))
         else:
-            # g.user_id = user[0]
-            # g.username = user[1]
-            session['user_id'] = user[0]
-            session['username'] = user[1]
+            cols = ('user_id', 'username', 'password', 'first_name', 'last_name', 'birth_date')
+            for k,v in zip(cols, user):
+                session[k] = v
             return redirect(url_for('tweets', username = session['username']))
     else:
         flash('Invalid username or password')
@@ -84,13 +82,18 @@ def login():
 @app.route('/logout') #add variable usernames
 @login_required
 def logout():
-    session.pop('user_id')
-    session.pop('username')
+    session.clear()
     flash('Logout successful')
     return redirect(url_for('index'))
     
+    
+# @app.route('/<username>')
+# def get_tweets(username):
+#     if session['username'] == username:
+        
 
-@app.route('/<username>', methods=['POST', 'GET'])
+@app.route('/<username>')
+@login_required
 def tweets(username):
     # prepared_statement = """
     # select id, user_id, created, content from tweet where
@@ -104,7 +107,7 @@ def tweets(username):
     tweets = [dict(created = row[0], content = row[1]) for row in cur.fetchall()]
     # js = json.dumps(tweets)
     # return js
-    if 'username' not in session:
+    if username != session['username']:
         # cur = g.db.execute('SELECT content FROM tweet INNER JOIN user ON'\
         # 'tweet.user_id = user.id')
         return render_template('other_feed.html', tweets = tweets, username = username)
@@ -123,12 +126,14 @@ def profile():
     pass
     # return render_template('profile.html', data=data)
 
+
 def get_first_name(username):
     """Get the firstname of the username"""
     prepared_statement = """
     select first_name from user where username='{}'
     """.format(username)
     return g.db.execute(prepared_statement).fetchone()[0]
+
 
 def get_last_name(username):
     """Get the last name of the username"""
@@ -137,12 +142,14 @@ def get_last_name(username):
     """.format(username)
     return g.db.execute(prepared_statement).fetchone()[0]
     
+    
 def get_birth_date(username):
     """Get the birth_date of the username"""
     prepared_statement = """
     select birth_date from user where username='{}'
     """.format(username)
     return g.db.execute(prepared_statement).fetchone()[0]
+    
     
 def get_user_id(username):
     if username == 'favicon.ico':
@@ -153,14 +160,22 @@ def get_user_id(username):
     """.format(username)
     return g.db.execute(prepared_statement).fetchone()[0]
    
+   
 @app.route('/tweets/<username>', methods=['POST', 'GET'])
 @login_required
 def own_feed(username):
     
-    prepared_statement = "SELECT id, user_id, created, content from tweet where user_id='{}'".format(get_user_id(username))
-    cur = g.db.execute(prepared_statement)
-    tweets = [dict(tweet_id=row[0], name=username, date=row[2], content=row[3]) for row in cur.fetchall()]
-    return render_template("own_feed.html", tweets=tweets)
+    if request.method == 'GET':
+        prepared_statement = "SELECT id, user_id, created, content from tweet where user_id='{}'".format(get_user_id(username))
+        cur = g.db.execute(prepared_statement)
+        tweets = [dict(tweet_id=row[0], name=username, date=row[2], content=row[3]) for row in cur.fetchall()]
+        return render_template("own_feed.html", tweets=tweets)
+        
+    if request.method == 'POST':
+        prepared_statement = """INSERT INTO 'tweet' ('user_id', 'content') VALUES ({}, {})""".format(username, request.form['tweet'])
+        cur = g.db.execute(prepared_statement)
+        return redirect(url_for('own_feed'))
+        
 
 
 @app.route('/other_feed')
