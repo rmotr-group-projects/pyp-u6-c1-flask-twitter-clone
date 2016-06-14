@@ -65,7 +65,7 @@ def login():
     ,(request.form['username'],))
     user = cur.fetchone()
     if user:
-        pass_hash = md5(request.form['password']).hexdigest()
+        pass_hash = md5(request.form['password'.encode('utf-8')]).hexdigest()
         if pass_hash != user[2]:
             flash('Invalid username or password')
             return redirect(url_for('login'))
