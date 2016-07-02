@@ -1,12 +1,10 @@
 # [pyp-w4] Twitter clone
 
-Today we will build our first web application. It's going to be a very basic clone of Twitter website running on top of the `Flask` web framework.
+Today's project consists on building a Twitter clone using Flask.
 
 ## Setting up the database
 
-Our data model will contain just two tables (`user` and `tweet`), which are going to be stored in `SQLite` database. To know extra details about each of the tables, please take a look at the provided schema in `twitter-schema.sql`. You should be able to use that SQL script to set up your local file database.
-
-Just run the SQL script as follows:
+Our data model contains just two tables (`user` and `tweet`), which are going to be stored using `SQLite`. You can use the file `twitter-schema.sql` to create your local database schema, using the following command:
 
 ```bash
 $ sqlite3 twitter.db < twitter-schema.sql
@@ -14,7 +12,7 @@ $ sqlite3 twitter.db < twitter-schema.sql
 
 ## Testing data
 
-Once your database is set up, you will probably need some pre loaded data before you can start testing your app. Feel free to use SQL queries to fill both tables with information. In the `twitter-schema.sql` file you will see some commented sample queries you can use to load information.
+Once your database is set up, you will probably need some pre loaded data before you can start testing your app. Feel free to use SQL queries to fill both tables with information. In the `twitter-schema.sql` file you will see some sample queries commented out.
 
 Note: The `password` field in `user` table is stored as the MD5 hash of the user's password. **Remember to never store any password as plain text**
 

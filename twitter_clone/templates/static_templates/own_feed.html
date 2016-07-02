@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Twitter clone</title>
+
+        <!-- styles -->
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../static/css/styles.css">
+    </head>
+    <body>
+        <div class="container body-container">
+
+            <nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Twitter clone</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+
+            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> martinzugnoni</a></li>
+            <li><a href="/logout?next=%2Fmartinzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+
+        <div class="row">
+            <form role="form" action="" method="POST">
+    		  <div class="form-group">
+                <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
+    		  </div>
+    		  <button type="submit" class="btn btn-info pull-right">Submit</button>
+    		</form>
+        </div>
+
+
+        <div class="row">
+
+
+            <div class="well well-large">
+
+                <form action="/tweets/27/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 15:10:39</span>
+                </div>
+                <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&#39;s standard dummy text ever. </div>
+
+
+            </div>
+
+            <div class="well well-large">
+
+                <form action="/tweets/7/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 01:09:26</span>
+                </div>
+                <div>Even more testing...</div>
+
+
+            </div>
+
+            <div class="well well-large">
+
+                <form action="/tweets/6/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 01:02:55</span>
+                </div>
+                <div>This works pretty well</div>
+
+
+            </div>
+
+            <div class="well well-large">
+
+                <form action="/tweets/5/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 01:02:35</span>
+                </div>
+                <div>Other one from the web site</div>
+
+
+            </div>
+
+            <div class="well well-large">
+
+                <form action="/tweets/4/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 01:01:29</span>
+                </div>
+                <div>First tweet from form...</div>
+
+
+            </div>
+
+            <div class="well well-large">
+
+                <form action="/tweets/1/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 00:17:20</span>
+                </div>
+                <div>Hello World!</div>
+
+
+            </div>
+
+            <div class="well well-large">
+
+                <form action="/tweets/2/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 00:17:20</span>
+                </div>
+                <div>This is so awesome</div>
+
+
+            </div>
+
+            <div class="well well-large">
+
+                <form action="/tweets/3/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+
+                <div>
+                    <strong>@martinzugnoni</strong>
+                    <span class="label label-primary">2016-06-07 00:17:20</span>
+                </div>
+                <div>Testing twitter clone</div>
+
+
+            </div>
+
+
+        </div>
+    </div>
+    <div class="col-sm-2"></div>
+</div>
+
+        </div>
+    </body>
+
+    <!-- scripts -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
+</html>
