@@ -30,7 +30,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
-            return redirect(url_for('login', next=request.url))
+            return redirect(url_for('login', next=request.url)) 
         return f(*args, **kwargs)
     return decorated_function
 
@@ -55,11 +55,12 @@ def login():
         #cursor = g.db.cursor()
         #Parametetrize SQL queries to prevent sql injection
         try:
-            query = "SELECT id from user WHERE username = ? AND password = ?"
+            query = "SELECT id, username from user WHERE username = ? AND password = ?"
             cursor = g.db.execute(query, (username, password))
             #cursor = g.db.execute(query, (username, hashedPassword))
             results = cursor.fetchall()
-            user_id = results[0][0] # <------
+            user_id = results[0][0]
+            username = results[0][1]
             session["logged_in"] = True
             session["user_id"] = user_id
             session["username"] = username
@@ -69,15 +70,40 @@ def login():
             return redirect("/login/")
             # return "you are wrong {}".format(results)
 
-# @login_required
+
 @app.route("/own_feed/", methods = ["GET", "POST"])
+@login_required
 def own_feed():
     if request.method == 'GET':
         query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
         cursor = g.db.execute(query, (session['user_id'],))
         tweets = _retrieve_tweets(session['user_id'])
         return render_template('own_feed.html', tweets=tweets)
+    if request.method == 'POST':
+        #check if tweet is less than 140 chars, otherwise spit a message
+        _post_tweet(session['user_id'], request.form['tweet'])
+        # want to upload request.form['tweet'] = tweet text, need user_id that posted it
+        tweets = _retrieve_tweets(session['user_id'])
+        return render_template('own_feed.html', tweets=tweets)
+        
+        
+        #query = "INSE"
+# CREATE TABLE tweet (
+#   id INTEGER PRIMARY KEY autoincrement,
+#   user_id INTEGER,
+#   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+#   content TEXT NOT NULL,
+#   FOREIGN KEY(user_id) REFERENCES user(id),
+#   CHECK(
+#       typeof("content") = "text" AND
+#       length("content") <= 140
+#   )
 
+# INSERT INTO "tweet" ("user_id", "content") VALUES (12, "I love DOGE");
+def _post_tweet(user_id, tweet_text):
+    query = 'INSERT INTO "tweet" ("user_id", "content") VALUES (?, ?)'
+    g.db.execute(query, (user_id, tweet_text))
+    
 def _retrieve_tweets(user_id):
     query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
     cursor = g.db.execute(query, (user_id,))
