@@ -62,14 +62,14 @@ def login():
             user_id = results[0][0] # <------
             session["logged_in"] = True
             session["user_id"] = user_id
-            session["username"] = username
+            session["user_name"] = username
             return redirect("/own_feed/")
             #return "your user id is {}".format(id)
         except:
             return redirect("/login/")
             # return "you are wrong {}".format(results)
 
-# @login_required
+@login_required        
 @app.route("/own_feed/", methods = ["GET", "POST"])
 def own_feed():
     if request.method == 'GET':
@@ -93,7 +93,7 @@ def other_feed():
 def logout():
     session.pop
     
-
+    #return ren
 
 @app.route('/')
 #@login_required()

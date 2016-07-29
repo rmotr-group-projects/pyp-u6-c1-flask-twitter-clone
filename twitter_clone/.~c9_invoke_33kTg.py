@@ -62,21 +62,20 @@ def login():
             user_id = results[0][0] # <------
             session["logged_in"] = True
             session["user_id"] = user_id
-            session["username"] = username
+            session["user_name"] = username
             return redirect("/own_feed/")
             #return "your user id is {}".format(id)
         except:
             return redirect("/login/")
             # return "you are wrong {}".format(results)
-
-# @login_required
+@        
 @app.route("/own_feed/", methods = ["GET", "POST"])
 def own_feed():
     if request.method == 'GET':
         query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
         cursor = g.db.execute(query, (session['user_id'],))
         tweets = _retrieve_tweets(session['user_id'])
-        return render_template('own_feed.html', tweets=tweets)
+        tweets = _retrieve_tweets(session['user_id'])
 
 def _retrieve_tweets(user_id):
     query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"

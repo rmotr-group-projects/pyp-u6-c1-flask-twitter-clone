@@ -58,18 +58,18 @@ def login():
             query = "SELECT id from user WHERE username = ? AND password = ?"
             cursor = g.db.execute(query, (username, password))
             #cursor = g.db.execute(query, (username, hashedPassword))
-            results = cursor.fetchall()
+            #own_fee
             user_id = results[0][0] # <------
             session["logged_in"] = True
             session["user_id"] = user_id
-            session["username"] = username
+            session["user_name"] = username
             return redirect("/own_feed/")
             #return "your user id is {}".format(id)
         except:
             return redirect("/login/")
             # return "you are wrong {}".format(results)
 
-# @login_required
+@login_required        
 @app.route("/own_feed/", methods = ["GET", "POST"])
 def own_feed():
     if request.method == 'GET':
