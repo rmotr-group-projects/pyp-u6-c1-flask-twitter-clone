@@ -54,14 +54,14 @@
                 
                 {% for tweet in tweets%}
                     <div class="well well-large">
-                        <form action="/tweets/27/delete?next=http://localhost:8080/martinzugnoni" method="POST">
+                        <form action="{{url_for('delete', tweet_id=tweet['tweet_id']) }} " method="POST">  <!-- /tweets/{{tweet['tweet_id']}}/delete"  -->
                             <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
                         </form>
                     <div>
                         <strong>@{{session['user_name']}}</strong>
                         <span class="label label-primary">{{tweet['created']}}</span>
                     </div>
-                        <div> {{tweet['content']}} </div>
+                        <div>{{tweet['tweet_id']}} {{tweet['content']}} </div>
                     </div>
                 {% endfor %}
 

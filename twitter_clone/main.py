@@ -64,16 +64,14 @@ def login():
             session["logged_in"] = True
             session["user_id"] = user_id
             session["username"] = username
-            return redirect("/own_feed/")
-            #return "your user id is {}".format(id)
+            return redirect(url_for('own_feed', username = session['username']))
         except:
-            return redirect("/login/")
-            # return "you are wrong {}".format(results)
+            return redirect(url_for('login'))
 
 
-@app.route("/own_feed/", methods = ["GET", "POST"])
+@app.route("/<username>", methods = ["GET", "POST"])
 @login_required
-def own_feed():
+def own_feed(username):
     if request.method == 'GET':
         query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
         cursor = g.db.execute(query, (session['user_id'],))
@@ -85,31 +83,35 @@ def own_feed():
         # want to upload request.form['tweet'] = tweet text, need user_id that posted it
         tweets = _retrieve_tweets(session['user_id'])
         return render_template('own_feed.html', tweets=tweets)
-        
-        
-        #query = "INSE"
-# CREATE TABLE tweet (
-#   id INTEGER PRIMARY KEY autoincrement,
-#   user_id INTEGER,
-#   created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-#   content TEXT NOT NULL,
-#   FOREIGN KEY(user_id) REFERENCES user(id),
-#   CHECK(
-#       typeof("content") = "text" AND
-#       length("content") <= 140
-#   )
+  
+# http://tweet-tweet-clone-jessicango.c9users.io:8080/tweets//delete?next=http://localhost:8080/doge
+@app.route("/tweets/<tweet_id>/delete", methods = ["POST"])    
+def delete(tweet_id):
+    _delete_tweet(tweet_id)
+    return redirect(url_for('own_feed', username = session['username']))
 
-# INSERT INTO "tweet" ("user_id", "content") VALUES (12, "I love DOGE");
+
 def _post_tweet(user_id, tweet_text):
     query = 'INSERT INTO "tweet" ("user_id", "content") VALUES (?, ?)'
     g.db.execute(query, (user_id, tweet_text))
+    g.db.commit()
     
+def _delete_tweet(tweet_id):
+    query = "DELETE FROM 'tweet' WHERE id = ?"
+    g.db.execute(query, (tweet_id,))
+    g.db.commit()
+    #construct delete query
+    #before executing delete query, make sure that user owns that tweet
+    
+    pass
+
 def _retrieve_tweets(user_id):
     query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
     cursor = g.db.execute(query, (user_id,))
-    tweets = [dict(user_id = row[0], created = row[1], content = row[2]) for row in cursor.fetchall()]
+    tweets = [dict(tweet_id = str(row[0]), created = row[1], content = row[2]) for row in cursor.fetchall()]
     return tweets
-    
+
+
 @app.route("/other_feed/", methods = ['GET', 'POST'])
 def other_feed():
     if request.method == 'GET':
