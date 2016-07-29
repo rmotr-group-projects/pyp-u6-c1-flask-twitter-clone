@@ -29,6 +29,7 @@ CREATE TABLE tweet (
 );
 
 INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (10, "martinzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-01-26");
+INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (14, "martinzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-01-26");
 INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (11, "ivanzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-07-06");
 INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (12, "doge", "1", "2016-07-06");
 INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (13, "doge 🐶🐶🐶🐶", "2", "2016-07-06");

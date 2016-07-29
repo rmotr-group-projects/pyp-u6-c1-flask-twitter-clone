@@ -26,7 +26,7 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
 
-            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> martinzugnoni</a></li>
+            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> {{session['username']}} </a></li>
             <li><a href="/logout?next=%2Fivanzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
 
       </ul>
@@ -42,55 +42,17 @@
 
         <div class="row">
 
-
+            {% for tweet in tweets %}
             <div class="well well-large">
 
-
                 <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:42:45</span>
+                    <strong>@{{username}}</strong>
+                    <span class="label label-primary">{{tweet['created']}}</span>
                 </div>
-                <div>sdfasdf</div>
-
+                <div>{{tweet['content']}}</div>
 
             </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:41:44</span>
-                </div>
-                <div>sdfasdfadsf</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:36</span>
-                </div>
-                <div>dfgfdgdfg</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:20</span>
-                </div>
-                <div>kjasdhjaskdh</div>
-
-
-            </div>
-
+            {% endfor %}
 
         </div>
     </div>

@@ -78,10 +78,10 @@ def _is_user_page(username):
 @app.route("/<username>", methods = ["GET", "POST"])
 @login_required
 def display_feed(username):
+    
     if _is_user_page(username) == True:
+        
         if request.method == 'GET':
-            query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
-            cursor = g.db.execute(query, (session['user_id'],))
             tweets = _retrieve_tweets(session['user_id'])
             return render_template('own_feed.html', tweets=tweets)
             
@@ -91,13 +91,15 @@ def display_feed(username):
             # want to upload request.form['tweet'] = tweet text, need user_id that posted it
             tweets = _retrieve_tweets(session['user_id'])
             return render_template('own_feed.html', tweets=tweets)
+            
     elif _is_user_page(username) == False:
         if request.method == 'GET':
-            query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
-            cursor = g.db.execute(query, (username,))
-            tweets = _retrieve_tweets(username)
-            return render_template('other_feed.html', tweets=tweets)
-  
+            user_id = _get_user_id(username)
+            tweets = _retrieve_tweets(user_id)
+            return render_template('other_feed.html', tweets=tweets, username=username)
+
+
+
 @app.route("/tweets/<tweet_id>/delete", methods = ["POST"])    
 def delete(tweet_id):
     _delete_tweet(tweet_id)
@@ -108,12 +110,13 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# @app.route("/profile", methods = ['GET', 'POST'])
-# def profile():
-#     if request.method == 'GET':
-#         return render_template('profile.html')
-#     if request.method == 'POST':
-#         pass
+@app.route("/profile", methods = ['GET', 'POST'])
+def profile():
+    if request.method == 'GET':
+        return render_template('profile.html')
+    if request.method == 'POST':
+        pass
+    
 @app.route('/')
 #@login_required()
 def homepage():
@@ -138,6 +141,12 @@ def _retrieve_tweets(user_id):
     tweets = [dict(tweet_id = str(row[0]), created = row[1], content = row[2]) for row in cursor.fetchall()]
     return tweets
 
+def _get_user_id(username):
+    query = "SELECT id FROM 'user' WHERE username = ?"
+    cursor = g.db.execute(query, (username,))
+    result = cursor.fetchall()
+    user_id = str(result[0][0])
+    return user_id
 
 if __name__ == "__main__":
     app.run()
