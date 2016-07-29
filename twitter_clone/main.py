@@ -56,17 +56,20 @@ def login():
         #cursor = g.db.cursor()
         #Parametetrize SQL queries to prevent sql injection
         try:
-            query = "SELECT id, username from user WHERE username = ? AND password = ?"
+            query = "SELECT id, username FROM user WHERE username = ? AND password = ?"
             cursor = g.db.execute(query, (username, password))
             #cursor = g.db.execute(query, (username, hashedPassword))
             results = cursor.fetchall()
+        # if results == None: # not this
+        #return username + password + str(results)  #empty list???
             user_id = results[0][0]
             username = results[0][1]
             session["logged_in"] = True
-            session["user_id"] = user_id
+            session["user_id"] = str(user_id)
             session["username"] = username
             return redirect(url_for('display_feed', username = session['username']))
-        except:
+        except: # here
+            
             return redirect(url_for('login'))
 
 def _is_user_page(username):
@@ -98,8 +101,6 @@ def display_feed(username):
             tweets = _retrieve_tweets(user_id)
             return render_template('other_feed.html', tweets=tweets, username=username)
 
-
-
 @app.route("/tweets/<tweet_id>/delete", methods = ["POST"])    
 def delete(tweet_id):
     _delete_tweet(tweet_id)
@@ -110,12 +111,32 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-@app.route("/profile", methods = ['GET', 'POST'])
+@app.route("/profile/", methods = ['GET', 'POST'])
+@login_required
 def profile():
     if request.method == 'GET':
         return render_template('profile.html')
     if request.method == 'POST':
-        pass
+        username = request.form['username']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        birth_date = request.form['birth_date']
+        _profile_update(first_name, last_name, birth_date)
+        return render_template('profile.html', first_name=first_name, last_name=last_name, birth_date=birth_date)
+
+# DROP TABLE if exists user;
+# CREATE TABLE user (
+#   id INTEGER PRIMARY KEY autoincrement,
+#   username TEXT NOT NULL,
+#   password TEXT NOT NULL,
+#   first_name TEXT,
+#   last_name TEXT,
+#   birth_date DATE,
+#   CHECK (
+#       length("birth_date") = 10
+#   )
+# );
+
     
 @app.route('/')
 #@login_required()
@@ -147,6 +168,15 @@ def _get_user_id(username):
     result = cursor.fetchall()
     user_id = str(result[0][0])
     return user_id
+
+def _profile_update(first_name, last_name, birth_date):
+    if len(birth_date) != 10:
+        query = "UPDATE user SET first_name = ?, last_name = ? WHERE id = ?"
+        g.db.execute(query, (first_name, last_name, session['user_id']))
+    else:
+        query = "UPDATE user SET first_name = ?, last_name = ?, birth_date = ? WHERE id = ?"
+        g.db.execute(query, (first_name, last_name, birth_date, session['user_id']))
+    g.db.commit()
 
 if __name__ == "__main__":
     app.run()
