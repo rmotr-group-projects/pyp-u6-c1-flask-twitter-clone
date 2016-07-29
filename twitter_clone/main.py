@@ -69,16 +69,11 @@ def login():
         except:
             return redirect(url_for('login'))
 
-# @app.route("/<username>")
 def _is_user_page(username):
     """
     Checks to see if the user is visiting his/her own timeline
     """
     return session['username'] == username
-    #     return
-    #     return redirect(url_for('own_feed', username = session['username']))
-    # return redirect(url_for('other_feed'))
-
 
 @app.route("/<username>", methods = ["GET", "POST"])
 @login_required
@@ -102,27 +97,29 @@ def display_feed(username):
             cursor = g.db.execute(query, (username,))
             tweets = _retrieve_tweets(username)
             return render_template('other_feed.html', tweets=tweets)
-        
   
 @app.route("/tweets/<tweet_id>/delete", methods = ["POST"])    
 def delete(tweet_id):
     _delete_tweet(tweet_id)
     return redirect(url_for('own_feed', username = session['username']))
 
-    
 @app.route("/logout/")
 def logout():
-    session.pop
-    
+    session.clear()
+    return redirect(url_for('login'))
 
-
+# @app.route("/profile", methods = ['GET', 'POST'])
+# def profile():
+#     if request.method == 'GET':
+#         return render_template('profile.html')
+#     if request.method == 'POST':
+#         pass
 @app.route('/')
 #@login_required()
 def homepage():
     return redirect(url_for('login'))
 
 #SQL query helper functions
-
 def _post_tweet(user_id, tweet_text):
     query = 'INSERT INTO "tweet" ("user_id", "content") VALUES (?, ?)'
     g.db.execute(query, (user_id, tweet_text))
