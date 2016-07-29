@@ -51,14 +51,14 @@ def login():
         
         username = request.form["username"]
         password = request.form["password"]
-        #hashedPassword = _hash_password(password)
+        # hashedPassword = _hash_password(password)
 
         #cursor = g.db.cursor()
         #Parametetrize SQL queries to prevent sql injection
         try:
             query = "SELECT id, username FROM user WHERE username = ? AND password = ?"
             cursor = g.db.execute(query, (username, password))
-            #cursor = g.db.execute(query, (username, hashedPassword))
+            # cursor = g.db.execute(query, (username, hashedPassword))
             results = cursor.fetchall()
         # if results == None: # not this
         #return username + password + str(results)  #empty list???
@@ -115,7 +115,9 @@ def logout():
 @login_required
 def profile():
     if request.method == 'GET':
-        return render_template('profile.html')
+        profile_details = _get_profile_information(session['user_id'])
+        # return str(profile_details[0][1])
+        return render_template('profile.html', first_name=profile_details[0][0], last_name=profile_details[0][1], birth_date=profile_details[0][2])
     if request.method == 'POST':
         username = request.form['username']
         first_name = request.form['first_name']
@@ -175,6 +177,12 @@ def _profile_update(first_name, last_name, birth_date):
         query = "UPDATE user SET first_name = ?, last_name = ?, birth_date = ? WHERE id = ?"
         g.db.execute(query, (first_name, last_name, birth_date, session['user_id']))
     g.db.commit()
+
+def _get_profile_information(user_id):
+    query = "SELECT first_name, last_name, birth_date FROM user WHERE id = ?"
+    cursor = g.db.execute(query, (user_id,))
+    results = cursor.fetchall()
+    return results
 
 if __name__ == "__main__":
     app.run()
