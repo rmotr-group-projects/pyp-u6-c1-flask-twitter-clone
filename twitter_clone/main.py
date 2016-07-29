@@ -153,9 +153,7 @@ def _delete_tweet(tweet_id):
     query = "DELETE FROM 'tweet' WHERE id = ?"
     g.db.execute(query, (tweet_id,))
     g.db.commit()
-    #construct delete query
-    #before executing delete query, make sure that user owns that tweet
-
+    
 def _retrieve_tweets(user_id):
     query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
     cursor = g.db.execute(query, (user_id,))
