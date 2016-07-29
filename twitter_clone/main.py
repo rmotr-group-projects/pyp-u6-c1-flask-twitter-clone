@@ -38,6 +38,7 @@ def login_required(f):
 #PYTHONPATH=. python twitter_clone/runserver.py
 
 # implement your views here
+
 @app.route("/login/", methods = ["GET", "POST"])
 def login():
     """
@@ -64,32 +65,63 @@ def login():
             session["logged_in"] = True
             session["user_id"] = user_id
             session["username"] = username
-            return redirect(url_for('own_feed', username = session['username']))
+            return redirect(url_for('display_feed', username = session['username']))
         except:
             return redirect(url_for('login'))
+
+# @app.route("/<username>")
+def _is_user_page(username):
+    """
+    Checks to see if the user is visiting his/her own timeline
+    """
+    return session['username'] == username
+    #     return
+    #     return redirect(url_for('own_feed', username = session['username']))
+    # return redirect(url_for('other_feed'))
 
 
 @app.route("/<username>", methods = ["GET", "POST"])
 @login_required
-def own_feed(username):
-    if request.method == 'GET':
-        query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
-        cursor = g.db.execute(query, (session['user_id'],))
-        tweets = _retrieve_tweets(session['user_id'])
-        return render_template('own_feed.html', tweets=tweets)
-    if request.method == 'POST':
-        #check if tweet is less than 140 chars, otherwise spit a message
-        _post_tweet(session['user_id'], request.form['tweet'])
-        # want to upload request.form['tweet'] = tweet text, need user_id that posted it
-        tweets = _retrieve_tweets(session['user_id'])
-        return render_template('own_feed.html', tweets=tweets)
+def display_feed(username):
+    if _is_user_page(username) == True:
+        if request.method == 'GET':
+            query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
+            cursor = g.db.execute(query, (session['user_id'],))
+            tweets = _retrieve_tweets(session['user_id'])
+            return render_template('own_feed.html', tweets=tweets)
+            
+        if request.method == 'POST':
+            #check if tweet is less than 140 chars, otherwise spit a message
+            _post_tweet(session['user_id'], request.form['tweet'])
+            # want to upload request.form['tweet'] = tweet text, need user_id that posted it
+            tweets = _retrieve_tweets(session['user_id'])
+            return render_template('own_feed.html', tweets=tweets)
+    elif _is_user_page(username) == False:
+        if request.method == 'GET':
+            query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
+            cursor = g.db.execute(query, (username,))
+            tweets = _retrieve_tweets(username)
+            return render_template('other_feed.html', tweets=tweets)
+        
   
-# http://tweet-tweet-clone-jessicango.c9users.io:8080/tweets//delete?next=http://localhost:8080/doge
 @app.route("/tweets/<tweet_id>/delete", methods = ["POST"])    
 def delete(tweet_id):
     _delete_tweet(tweet_id)
     return redirect(url_for('own_feed', username = session['username']))
 
+    
+@app.route("/logout/")
+def logout():
+    session.pop
+    
+
+
+@app.route('/')
+#@login_required()
+def homepage():
+    return redirect(url_for('login'))
+
+#SQL query helper functions
 
 def _post_tweet(user_id, tweet_text):
     query = 'INSERT INTO "tweet" ("user_id", "content") VALUES (?, ?)'
@@ -102,31 +134,12 @@ def _delete_tweet(tweet_id):
     g.db.commit()
     #construct delete query
     #before executing delete query, make sure that user owns that tweet
-    
-    pass
 
 def _retrieve_tweets(user_id):
     query = "SELECT id, created, content FROM tweet WHERE user_id = ? ORDER BY created desc"
     cursor = g.db.execute(query, (user_id,))
     tweets = [dict(tweet_id = str(row[0]), created = row[1], content = row[2]) for row in cursor.fetchall()]
     return tweets
-
-
-@app.route("/other_feed/", methods = ['GET', 'POST'])
-def other_feed():
-    if request.method == 'GET':
-        return render_template('other_feed.html')
-    
-@app.route("/logout/")
-def logout():
-    session.pop
-    
-
-
-@app.route('/')
-#@login_required()
-def homepage():
-    return "Hello world"
 
 
 if __name__ == "__main__":
