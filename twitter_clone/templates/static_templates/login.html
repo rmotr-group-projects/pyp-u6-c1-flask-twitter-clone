@@ -34,6 +34,10 @@
 </nav>
 
 
+{% block body %}
+{% if error %}
+    <p class=error><strong>{{ error }}</strong> 
+{% endif %}
 <div class="row">
     <div class="col-md-12">
         <form role="form" action="" method="POST">
@@ -51,6 +55,7 @@
 </div>
 
         </div>
+{% endblock %}
     </body>
 
     <!-- scripts -->

@@ -214,7 +214,7 @@ class TweetsTestCase(BaseTwitterCloneTestCase):
             self.assertEqual('http://localhost/', response.location)
 
             cursor = self.db.execute("select * from tweet where user_id = 1;")
-            self.assertEqual(len(cursor.fetchall()), 1)
+            self.assertEqual(len(cursor.fetchall()), 2)
 
     def test_delete_tweet_not_authenticated_redirects_login(self):
         response = self.client.post('/tweets/1/delete')
