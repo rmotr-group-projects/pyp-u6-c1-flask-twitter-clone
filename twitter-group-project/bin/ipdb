@@ -1,0 +1,10 @@
+#!/home/ubuntu/workspace/twitter-group-project/bin/python
+# EASY-INSTALL-ENTRY-SCRIPT: 'ipdb==0.10.1','console_scripts','ipdb'
+__requires__ = 'ipdb==0.10.1'
+import sys
+from pkg_resources import load_entry_point
+
+if __name__ == '__main__':
+    sys.exit(
+        load_entry_point('ipdb==0.10.1', 'console_scripts', 'ipdb')()
+    )

@@ -29,9 +29,12 @@ class BaseTwitterCloneTestCase(unittest.TestCase):
             sql_query = f.read()
         for statement in sql_query.split(';'):
             self.db.execute(statement)
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (1, "testuser1", "{}");'.format(md5('1234').hexdigest()))
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (2, "testuser2", "{}");'.format(md5('1234').hexdigest()))
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (3, "testuser3", "{}");'.format(md5('1234').hexdigest()))
+        # self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (1, "testuser1", ":password");', { 'password' : md5('1234').hexdigest() })
+        # self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (2, "testuser2", ":password");', { 'password' : md5('1234').hexdigest() })
+        # self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (3, "testuser3", ":password");', { 'password' : md5('1234').hexdigest() })
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (1, "testuser1", "{}");'.format(md5(b'1234').hexdigest()))
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (2, "testuser2", "{}");'.format(md5(b'1234').hexdigest()))
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (3, "testuser3", "{}");'.format(md5(b'1234').hexdigest()))
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (1, "Tweet 1 testuser1");')
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (1, "Tweet 2 testuser1");')
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (2, "Tweet 1 testuser2");')
@@ -214,7 +217,7 @@ class TweetsTestCase(BaseTwitterCloneTestCase):
             self.assertEqual('http://localhost/', response.location)
 
             cursor = self.db.execute("select * from tweet where user_id = 1;")
-            self.assertEqual(len(cursor.fetchall()), 1)
+            self.assertEqual(len(cursor.fetchall()), 2)
 
     def test_delete_tweet_not_authenticated_redirects_login(self):
         response = self.client.post('/tweets/1/delete')
