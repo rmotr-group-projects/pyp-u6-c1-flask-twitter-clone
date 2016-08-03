@@ -4,7 +4,6 @@ from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
                    flash, url_for)
-from twitter_clone.exceptions import ParameterError
 import re
 
 
@@ -118,7 +117,8 @@ def feed(username):
 
     # User Tweeting
     if request.method == 'POST':
-        tweet_text = request.form['tweet_text']
+        tweet_text = request.form['tweet']
+        basic_insert('tweet', ("user_id", "content"), tweet_text)
         pass
             
     if 'username' in session and session['username'] == username:
@@ -140,7 +140,8 @@ def logout(next=None):
 # If exist + correct redirect to logged in user's (own) feed (i.e. new render template)
 # Query db again for user feed tweets
     # tweets gets formated through jinja2 in html
-    
+
+# Abstracted hash function
 def hash_function(text):
     return md5(text).hexdigest()
 
@@ -172,7 +173,7 @@ def basic_insert(table, columns, content):
         raise ValueError
     else:
         # INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Hello World!");
-        cursor = g.db.execute('INSERT INTO "{tb}" {cn} VALUES {ct}'.format(tb=table, cn=columns_tuple, ct=content))
+        cursor = g.db.execute('INSERT INTO \"{tb}\" {cn} VALUES \"{ct}\"'.format(tb=table, cn=columns_tuple, ct=content))
     return
 
 # kwargs is the contents being updated, parameter is what we're trying to update (i.e. WHERE 'parameter') which should be a string of 'column = value'
@@ -203,7 +204,7 @@ def basic_update(table, parameter, **kwargs):
                 parameter = "".join(parameter_list)
             else:
                 # Too lazy to code edge cases atm
-                raise ParameterError
+                raise ValueError
                 
     else:
         raise AttributeError
