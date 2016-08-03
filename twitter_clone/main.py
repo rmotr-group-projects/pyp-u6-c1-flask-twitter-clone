@@ -107,6 +107,16 @@ def tweets(tweet_id):
             query = 'DELETE FROM tweet WHERE id = ?;'
             g.db.execute(query, tweet_id)
             g.db.commit()
+
+    # '''Create separate function for this so can be reused'''    
+    # all_tweets = basic_query('tweet', 'user_id, created, content, id')
+    # user_tweets = []
+    # for tweet in all_tweets:
+    #     if session['user_id'] == tweet[0]:
+    #         user_tweets.append({'created':tweet[1], 'content':tweet[2], 'tweet_id':tweet[3]})
+    # user_tweets = user_tweets[::-1]
+    # return render_template('own_feed.html',username=session['username'], tweets=user_tweets)
+    
     return redirect(url_for('feed',username=session['username']))
 
 
@@ -124,18 +134,12 @@ def feed(username):
             # if username is in it, let's assign that usernames id to the local user_id variable
             user_id = user[1]
     
-    # Return all tweets (for all users! just because we love Python)
-    all_tweets = basic_query('tweet', 'user_id, created, content, id')
-    # We're gonna store some tweets for a specific user in this list
-    user_tweets = []
-    for tweet in all_tweets:
-        # If the user_id that we defined earlier is in the row for an entry in
-        # then add this tweet to the user_tweets
-        if user_id == tweet[0]:
-            user_tweets.append({'created':tweet[1], 'content':tweet[2], 'tweet_id':tweet[3]})
-    user_tweets = user_tweets[::-1]
-    
+    user_tweets = get_user_tweets(user_id)
+
     ### User Tweeting ###
+    #print("This is the form:" + request.form)
+    # i think the error can be fixed for the test case of 302 != 403 if we put a condition to check to see
+    # if request.form['username'] == session['username']
     if request.method == 'POST':
         tweet_text = str(request.form['tweet'])
 
@@ -146,10 +150,12 @@ def feed(username):
         
         basic_insert('tweet', '(user_id, content)', (user_id,tweet_text))
         
-        return redirect(url_for('feed',username=username))
+        user_tweets = get_user_tweets(user_id)
+        return render_template('own_feed.html', username=session['username'], tweets=user_tweets)
         
     
     # WHY DO WE NEED THE EXTRA CONDITION TO CHECK IF USERNAME IS IN SESSION? DOESNT THE OTHER ONE DO IT ALREADY?
+    # Yeah, I think it's redundant
     if 'username' in session and session['username'] == username:
         return render_template('own_feed.html', username=session['username'], tweets=user_tweets)
     else:
@@ -168,6 +174,19 @@ def logout(next=None):
 # Abstracted hash function #####################################################
 def hash_function(text):
     return md5(text).hexdigest()
+
+# Function to get a list of dict tweets for a specific user
+def get_user_tweets(user_id):
+    # Return all tweets (for all users! just because we love Python)
+    all_tweets = basic_query('tweet', 'user_id, created, content, id')
+    # We're gonna store some tweets for a specific user in this list
+    user_tweets = []
+    for tweet in all_tweets:
+        # If the user_id that we defined earlier is in the row for an entry in
+        # then add this tweet to the user_tweets
+        if user_id == tweet[0]:
+            user_tweets.append({'created':tweet[1], 'content':tweet[2], 'tweet_id':tweet[3]})
+    return user_tweets[::-1]
 
 # Determines whether a piece of data is string or some iterable type, returns string if iterable, raise error if not string or iterable type
 def string_transform(data, iterable_type):
