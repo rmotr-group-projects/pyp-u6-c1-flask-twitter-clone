@@ -29,157 +29,180 @@ def login_required(f):
 
 
 
-# Index view
+# Index view ###################################################################
 @app.route('/')
 def index():
     if 'username' in session:
-        return redirect(url_for('feed', username=session['username'])) #'/{}'.format(session['username']))
+        return redirect(url_for('feed', username=session['username']))
     return redirect(url_for('login'))
 
-'''
-Basic Render_Template template
-@app.route('/hello/')
-@app.route('/hello/<name>')
-def hello(name=None):
-    return render_template('hello.html', name=name)
-'''
 
-# login view
+# Login view ###################################################################
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+    users = basic_query('user', 'username, password, id')
+    
     if request.method == 'POST':
         username = request.form['username']
         password = hash_function(request.form['password'])
 
+        '''Hard coded user query'''
         # query = 'SELECT username, password FROM user '#WHERE username=:username;'
         # subs = {'username': username}
         # cursor = g.db.execute(query)
         # users = cursor.fetchall()
         
-        users = basic_query('user', 'username, password')
-
-        
         for user in users:
             if user[0] == username and user[1] == password:
                 session['username'] = username
+                session['user_id'] = user[2]
                 flash('You were logged in')
                 return redirect(url_for('index'))
-        error = 'Invalid password or username.'
-            
+        error = 'Invalid username or password'
+    if request.method == "GET":
+        # Might need extra checks to be extra prudent with logging in/sessions
+        if 'username' in session:
+            return redirect(url_for('index'))
     return render_template('login.html', error=error)
     
     
-# profile view
-# profile = app.route(blah)(login_required(profile))
+    
+# Profile view #################################################################
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    
+    succesful_profile_update = None
     if request.method == 'POST':
         form = request.form
-        print(form['birth_date']) #2016-01-26
-        print(session['username'])
-        print(form) #ImmutableMultiDict([('username', u'martinzugnoni'), ('birth_date', u'2016-01-26'), ('first_name', u'MArtin'), ('last_name', u'BLah')])
-        query = 'UPDATE user SET first_name = {first_name}, last_name = {last_name}, birth_date = \
-        {birth_date} WHERE username = {username}'.format(first_name=form['first_name'], last_name=form['last_name'], \
-        birth_date=form['birth_date'], username=session['username'])
+        
+        '''Hard coded update'''
+        query = 'UPDATE user SET first_name = "{}", last_name = "{}", birth_date = \
+        "{}" WHERE username = "{}"'.format(form['first_name'], form['last_name'], \
+        form['birth_date'], session['username'])
+        
         g.db.execute(query)
+        g.db.commit()
+        
+        succesful_profile_update = "Your profile was correctly updated"
         
     
     user_data = {}
     users = basic_query('user', 'username, first_name, last_name, birth_date')
+    #print(users)
     for user in users:
         if session['username'] == user[0]:
             user_data = {'username':user[0], 'first_name':user[1], 'last_name':user[2], 'birth_date':user[3]}
              
-    return render_template('profile.html', user=user_data)
+    return render_template('profile.html', user=user_data, success = succesful_profile_update)
+
+# Tweets view ##################################################################
+@app.route('/tweets/<tweet_id>/delete', methods=['GET', 'POST'])
+def tweets(tweet_id):
+    tweet_id = (tweet_id,)
+    query = 'SELECT id, user_id FROM tweet WHERE user_id ='+ str(session['user_id']) +';'
+    list_tweet_user_ids = g.db.execute(query).fetchall()
+    for tweet_user_ids in list_tweet_user_ids:
+        if tweet_user_ids[0] == int(tweet_id[0]):
+            query = 'DELETE FROM tweet WHERE id = ?;'
+            g.db.execute(query, tweet_id)
+            g.db.commit()
+    return redirect(url_for('feed',username=session['username']))
 
 
-
-
-# feed view
+# Feed view ####################################################################
 @app.route('/<username>', methods=['GET', 'POST'])
 def feed(username):
     
-    # Gets user Tweets
+    ### Gets user Tweets ###
     user_id = None
+    # Returns a list of tuples with (unicode) username and user_id
     users = basic_query('user', 'username, id')
+    # Loop through the list of tuples and check to see if the <username> is in it
     for user in users:
         if username == user[0]:
-             user_id = user[1]
-
-    all_tweets = basic_query('tweet', 'user_id, created, content') 
+            # if username is in it, let's assign that usernames id to the local user_id variable
+            user_id = user[1]
+    
+    # Return all tweets (for all users! just because we love Python)
+    all_tweets = basic_query('tweet', 'user_id, created, content, id')
+    # We're gonna store some tweets for a specific user in this list
     user_tweets = []
     for tweet in all_tweets:
+        # If the user_id that we defined earlier is in the row for an entry in
+        # then add this tweet to the user_tweets
         if user_id == tweet[0]:
-            user_tweets.append({'created':tweet[1], 'content':tweet[2]})
-
-    # User Tweeting
+            user_tweets.append({'created':tweet[1], 'content':tweet[2], 'tweet_id':tweet[3]})
+    user_tweets = user_tweets[::-1]
+    
+    ### User Tweeting ###
     if request.method == 'POST':
-        tweet_text = request.form['tweet']
-        basic_insert('tweet', ("user_id", "content"), tweet_text)
-        pass
-            
+        tweet_text = str(request.form['tweet'])
+
+        '''Hard coded version'''
+        # print('INSERT INTO tweet (user_id, content) VALUES ' + str((user_id,tweet_text)) + ';')
+        # g.db.execute('INSERT INTO tweet (user_id, content) VALUES ' + str((user_id,tweet_text)) + ';')
+        # g.db.commit()
+        
+        basic_insert('tweet', '(user_id, content)', (user_id,tweet_text))
+        
+        return redirect(url_for('feed',username=username))
+        
+    
+    # WHY DO WE NEED THE EXTRA CONDITION TO CHECK IF USERNAME IS IN SESSION? DOESNT THE OTHER ONE DO IT ALREADY?
     if 'username' in session and session['username'] == username:
         return render_template('own_feed.html', username=session['username'], tweets=user_tweets)
     else:
         return render_template('other_feed.html', username=session['username'], tweet_user=username, tweets=user_tweets)
 
-
+# Logout view ##################################################################
 @app.route('/logout')
 def logout(next=None):
+    print(session)
     session.pop('username', None)
+    session.pop('user_id', None)
     if next:
         return redirect(next)
     return redirect(url_for('index'))
 
-# Login-POST
-# Query database for username:password combo
-    # Query username, md5(password)
-# If exist + correct redirect to logged in user's (own) feed (i.e. new render template)
-# Query db again for user feed tweets
-    # tweets gets formated through jinja2 in html
-
-# Abstracted hash function
+# Abstracted hash function #####################################################
 def hash_function(text):
     return md5(text).hexdigest()
 
-# Basic query that gets back column from a table, if column is not specified, then * will be used
-def basic_query(table, columns = '*'):
-    if isinstance(columns, list):
-        columns_string = ",".join(columns)
-    elif isinstance(columns, str):
-        columns_string = columns
+# Determines whether a piece of data is string or some iterable type, returns string if iterable, raise error if not string or iterable type
+def string_transform(data, iterable_type):
+    if isinstance(data, iterable_type):
+        return ",".join(data)
+    elif isinstance(data, str):
+        return data
     else:
         raise AttributeError
+
+# Basic query that gets back column from a table, if column is not specified, then * will be used
+def basic_query(table, columns = '*'):
+    columns_string = string_transform(columns, list)
     # c.execute("SELECT * FROM {tn} WHERE {idf}=?".format(tn=table_name, cn=column_2, idf=id_column), (123456,))
-    # subs = {'columns': columns_string, 'table': table}
-    # query = 'SELECT columns=:columns FROM table=:table;'
     cursor = g.db.execute('SELECT {cn} FROM {tb};'.format(tb=table, cn=columns_string))
     query_result = cursor.fetchall()
     return query_result
 
 # Basic insert, columns can be strings, but content has to be tuple matching string or tuple passed
 def basic_insert(table, columns, content):
-    if isinstance(columns, tuple):
-        columns_tuple = columns
-    elif isinstance(columns, str):
-        columns_tuple = columns.split(',')
-    else:
-        raise AttributeError
-        
-    if len(content) != len(columns_tuple):
+    '''Not working for tuples passed right now'''
+    columns_string = string_transform(columns, tuple)
+    columns_length = len(columns_string.split(','))
+
+    if len(content) != columns_length:
         raise ValueError
     else:
         # INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Hello World!");
-        cursor = g.db.execute('INSERT INTO \"{tb}\" {cn} VALUES \"{ct}\"'.format(tb=table, cn=columns_tuple, ct=content))
+        g.db.execute('INSERT INTO {tb} {cn} VALUES {ct};'.format(tb=table, cn=columns_string, ct=content))
+        g.db.commit()
+        #g.db.execute('INSERT INTO ? ? VALUES ?;' (table, columns_tuple, content))
     return
 
-# kwargs is the contents being updated, parameter is what we're trying to update (i.e. WHERE 'parameter') which should be a string of 'column = value'
-def basic_update(table, parameter, **kwargs):
-    # UPDATE Customers SET ContactName='Alfred Schmidt', City='Hamburg' WHERE CustomerName='Alfreds Futterkiste';
-    
+# Used by basic_update() to properly enclose strings in quotes
+def transform_update_string(parameter):
     # Check parameter format
     single_quote = "\'" #SQL requires single quotes
     if isinstance(parameter, str):
@@ -202,17 +225,26 @@ def basic_update(table, parameter, **kwargs):
                 
                 # Put list back into string
                 parameter = "".join(parameter_list)
+                return parameter
             else:
                 # Too lazy to code edge cases atm
                 raise ValueError
                 
     else:
         raise AttributeError
+ 
+'''Doesn't work because birthday might be date time object? Might need extra logic to sanitize'''
+# kwargs is the contents being updated, parameter is what we're trying to update 
+# (i.e. WHERE 'parameter') which should be a string of 'column = value'
+def basic_update(table, parameter, **kwargs):
+    # UPDATE Customers SET ContactName='Alfred Schmidt', City='Hamburg' WHERE CustomerName='Alfreds Futterkiste';
+    
+    parameter_string = transform_update_string(parameter)
     
     # Create a string from **kwargs of things to update
     content_list = ["{}='{}'".format(key,value) for key,value in kwargs.items()]
     content_string = ','.join(content_list)
 
-    cursor = g.db.execute('UPDATE {tb} SET {ct} WHERE {param};'.format(tb=table, ct=content_string, param=parameter))
-
+    g.db.execute('UPDATE {tb} SET {ct} WHERE {param};'.format(tb=table, ct=content_string, param=parameter_string))
+    g.db.commit()
     return

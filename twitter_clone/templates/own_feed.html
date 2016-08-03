@@ -38,7 +38,6 @@
 <div class="row">
     <div class="col-sm-2"></div>
     <div class="col-sm-8">
-
         <div class="row">
             <form role="form" action="" method="POST">
     		  <div class="form-group">
@@ -54,7 +53,7 @@
             {% for tweet in tweets %}
             <div class="well well-large">
 
-                <form action="/tweets/27/delete?next=http://localhost:8080/{{ username }}" method="POST">
+                <form action="/tweets/{{ tweet.tweet_id }}/delete" method="POST">
                     <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
                 </form>
 
