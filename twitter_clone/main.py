@@ -4,6 +4,9 @@ from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
                    flash, url_for)
+from twitter_clone.exceptions import ParameterError
+import re
+
 
 app = Flask(__name__)
 
@@ -155,7 +158,7 @@ def basic_query(table, columns = '*'):
     cursor = g.db.execute('SELECT {cn} FROM {tb};'.format(tb=table, cn=columns_string))
     query_result = cursor.fetchall()
     return query_result
-'''
+
 # Basic insert, columns can be strings, but content has to be tuple matching string or tuple passed
 def basic_insert(table, columns, content):
     if isinstance(columns, tuple):
@@ -169,19 +172,46 @@ def basic_insert(table, columns, content):
         raise ValueError
     else:
         # INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Hello World!");
-        cursor = g.db.execute('INSERT INTO "{tb}" {cn} VALUES {ct}'.format(tb=table, cn=columns_tuple, ct=content)
+        cursor = g.db.execute('INSERT INTO "{tb}" {cn} VALUES {ct}'.format(tb=table, cn=columns_tuple, ct=content))
     return
 
-# kwargs is the contents being updated, parameter is what we're trying to update (i.e. WHERE 'parameter')
+# kwargs is the contents being updated, parameter is what we're trying to update (i.e. WHERE 'parameter') which should be a string of 'column = value'
 def basic_update(table, parameter, **kwargs):
-    # UPDATE Customers
-    # SET ContactName='Alfred Schmidt', City='Hamburg'
-    # WHERE CustomerName='Alfreds Futterkiste';
+    # UPDATE Customers SET ContactName='Alfred Schmidt', City='Hamburg' WHERE CustomerName='Alfreds Futterkiste';
     
+    # Check parameter format
+    single_quote = "\'" #SQL requires single quotes
+    if isinstance(parameter, str):
+        equals_index = parameter.find('=')
+        after_equals = parameter[equals_index+1]
         
+        # If parameter value is not in quotes, put quotes around that value
+        if after_equals != single_quote:
+            first_quote_index = parameter.find(single_quote, after_equals)
+            
+            # Best case scenario: no quotes at all
+            if first_quote_index == -1:
+                # This gets the index right before an alphanumeric after the equals sign
+                to_quote_index = equals_index + re.search('\w',parameter[equals_index:]).start()
+                
+                #Strings are immutable in py so using a list instead
+                parameter_list = list(parameter) 
+                parameter_list[to_quote_index] = single_quote
+                parameter_list.append(single_quote)
+                
+                # Put list back into string
+                parameter = "".join(parameter_list)
+            else:
+                # Too lazy to code edge cases atm
+                raise ParameterError
+                
+    else:
+        raise AttributeError
     
-    
-    cursor = g.db.execute('UPDATE {tb} SET {ct} WHERE {param};'.format(tb=table, ct=content, param=parameters))
+    # Create a string from **kwargs of things to update
+    content_list = ["{}='{}'".format(key,value) for key,value in kwargs.items()]
+    content_string = ','.join(content_list)
+
+    cursor = g.db.execute('UPDATE {tb} SET {ct} WHERE {param};'.format(tb=table, ct=content_string, param=parameter))
 
     return
-'''
