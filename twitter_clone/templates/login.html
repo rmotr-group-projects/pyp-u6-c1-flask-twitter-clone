@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Twitter clone</title>
+
+        <!-- styles -->
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../../static/css/styles.css">
+    </head>
+    <body>
+        <div class="container body-container">
+
+            <nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">Twitter clone</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-right">
+
+            <li><a href="/login?next=%2Flogin"><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+<div class="row">
+    <div class="col-md-12">
+        {% if error %}
+            <p class="bg-primary"><strong>Error:</strong> {{ error }}</p>
+        {% endif %}
+        <form role="form" action="" method="POST">
+		  <div class="form-group">
+		    <label for="username">Username</label>
+		    <input class="form-control" name="username" placeholder="Your username">
+		  </div>
+		  <div class="form-group">
+		    <label for="password">Password</label>
+		    <input type="password" class="form-control" name="password" placeholder="Your password">
+		  </div>
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+    </div>
+</div>
+
+        </div>
+    </body>
+
+    <!-- scripts -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
+</html>
