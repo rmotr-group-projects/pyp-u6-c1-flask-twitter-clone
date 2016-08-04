@@ -1,8 +1,6 @@
-
 import os
-
-from twitter_clone.main import app
-from twitter_clone import settings
+from main import app
+import settings
 
 
 if __name__ == '__main__':

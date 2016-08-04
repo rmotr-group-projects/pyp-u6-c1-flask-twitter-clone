@@ -1,0 +1,22 @@
+{% extends "static_templates/layout.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <div class="row">
+
+                {% for index, tweet, timestamp in tweets %}
+                <div class="well well-large">
+                    <div>
+                        <strong>@{{username}}</strong>
+                        <span class="label label-primary">{{timestamp}}</span>
+                    </div>
+                    <div>{{tweet}}</div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
+{% endblock %}

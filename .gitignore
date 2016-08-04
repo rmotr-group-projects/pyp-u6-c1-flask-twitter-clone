@@ -63,3 +63,6 @@ target/
 
 *.db
 .DS_Store
+
+#c9 stuff
+/templates/.~c9*
