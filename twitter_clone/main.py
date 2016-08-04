@@ -28,7 +28,6 @@ def login_required(f):
     return decorated_function
 
 
-
 # Index view ###################################################################
 @app.route('/')
 def index():
@@ -67,7 +66,6 @@ def login():
     return render_template('login.html', error=error)
     
     
-    
 # Profile view #################################################################
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -86,10 +84,8 @@ def profile():
         
         succesful_profile_update = "Your profile was correctly updated"
         
-    
     user_data = {}
     users = basic_query('user', 'username, first_name, last_name, birth_date')
-    #print(users)
     for user in users:
         if session['username'] == user[0]:
             user_data = {'username':user[0], 'first_name':user[1], 'last_name':user[2], 'birth_date':user[3]}
@@ -98,53 +94,17 @@ def profile():
 
 
 # Tweets view ##################################################################
-# I don't think POST actually happens here, does it?  C: I think it gave me an error if I didnt include it
 @app.route('/tweets/<int:tweet_id>/delete', methods=['GET', 'POST'])
 @login_required
 def tweets(tweet_id):
-    # try:
-    #     tweet_id = int(tweet_i)d
-    # except:
-    #     pass 
-    # print("404 error check:" + str(type(tweet_id)))
-    # if not isinstance(tweet_id,int):
-    #     abort(404)
-    print basic_query('tweet')
-    # ('tweet', 'user_id, created, content, id')
     user_tweets = get_user_tweets(session['user_id'])
     deletion_query = 'DELETE FROM tweet WHERE id = ?;'
     for tweet in user_tweets:
-        print(tweet, tweet_id)
         if tweet['tweet_id'] == tweet_id:
-            print(tweet, tweet_id)
             g.db.execute(deletion_query, [tweet_id])
             g.db.commit()
     return redirect(url_for('index'))
             
-    
-    
-'''      
-    tweet_id = (tweet_id,)
-    
-    #test = g.db.execute("select * from tweet where user_id = {};".format(session['user_id']))
-    #print(len(test.fetchall()))
-    
-    #query = 'SELECT id, user_id FROM tweet WHERE user_id ='+ str(session['user_id']) +';'
-
- 
-    query = 'SELECT id, user_id FROM tweet WHERE user_id = ?;'
-    list_tweet_user_ids = g.db.execute(query,(str(session['user_id']),)).fetchall()
-    for tweet_user_ids in list_tweet_user_ids:
-        if tweet_user_ids[0] == int(tweet_id[0]):
-            query = 'DELETE FROM tweet WHERE id = ?;'
-            g.db.execute(query, tweet_id)
-            g.db.commit()
-            
-    #test1 = g.db.execute("select * from tweet where user_id = {};".format(session['user_id']))
-    #print("Number1:", len(test1.fetchall()))
-    
-    return redirect(url_for('index')) #redirect(url_for('feed',username=session['username']))
-'''
 
 # Feed view ####################################################################
 @app.route('/<username>', methods=['GET', 'POST'])
@@ -163,10 +123,6 @@ def feed(username):
     user_tweets = get_user_tweets(user_id)
 
     ### User Tweeting ###
-    #print("This is the form:" + request.form)
-    # i think the error can be fixed for the test case of 302 != 403 if we put a condition to check to see
-    # if request.form['username'] == session['username']
-    # We need to set up error handling using abort(), I pasted the link that way ---->
     if request.method == 'POST':
         
         # There's probably a more elegant way of doing this..
@@ -177,20 +133,12 @@ def feed(username):
             abort(403)
             
         tweet_text = str(request.form['tweet'])
-
-        '''Hard coded version'''
-        # print('INSERT INTO tweet (user_id, content) VALUES ' + str((user_id,tweet_text)) + ';')
-        # g.db.execute('INSERT INTO tweet (user_id, content) VALUES ' + str((user_id,tweet_text)) + ';')
-        # g.db.commit()
         
         basic_insert('tweet', '(user_id, content)', (user_id,tweet_text))
         
         user_tweets = get_user_tweets(user_id)
         return render_template('own_feed.html', username=session['username'], tweets=user_tweets)
         
-    
-    # WHY DO WE NEED THE EXTRA CONDITION TO CHECK IF USERNAME IS IN SESSION? DOESNT THE OTHER ONE DO IT ALREADY?
-    # Yeah, I think it's redundant
     if 'username' in session and session['username'] == username:
         return render_template('own_feed.html', username=session['username'], tweets=user_tweets)
     elif 'username' in session:
@@ -202,20 +150,17 @@ def feed(username):
 # Logout view ##################################################################
 @app.route('/logout')
 def logout(next=None):
-    print(session)
     session.pop('username', None)
     session.pop('user_id', None)
     if next:
         return redirect(next)
     return redirect(url_for('index'))
-
-
+    
 # Abstracted hash function #####################################################
 def hash_function(text):
     return md5(text).hexdigest()
 
-
-# Function to get a list of dict tweets for a specific user
+# Function to get a list of dict of tweets for a specific user #################
 def get_user_tweets(user_id):
     # Return all tweets (for all users! just because we love Python)
     all_tweets = basic_query('tweet', 'user_id, created, content, id')
