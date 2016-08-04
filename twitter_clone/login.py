@@ -1,5 +1,5 @@
 import sqlite3
-from modules import app
+from .modules import app
 from hashlib import md5
 from functools import wraps
 from flask import (g, request, session, redirect, render_template,

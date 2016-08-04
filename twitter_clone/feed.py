@@ -1,6 +1,6 @@
 import sqlite3
 from hashlib import md5
-from modules import *
+from .modules import app
 from functools import wraps
 from flask import (g, request, session, redirect, render_template,
                    flash, url_for, abort)

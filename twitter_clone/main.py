@@ -1,6 +1,17 @@
-from .login import login, login_required
-from .feed import other_feed, own_feed, feed
-from .modules import app
+try:
+    from .login import login, login_required
+except ValueError:
+    from twitter_clone.login import login, login_required
+
+try:
+    from .feed import other_feed, own_feed, feed
+except ValueError:
+    from twitter_clone.feed import other_feed, own_feed, feed
+
+try:
+    from .modules import app
+except ValueError:
+    from twitter_clone.modules import app
 
 import sqlite3
 from hashlib import md5
