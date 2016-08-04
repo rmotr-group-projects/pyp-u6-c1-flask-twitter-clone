@@ -2,35 +2,19 @@ import sqlite3
 from hashlib import md5
 from functools import wraps
 from flask import Flask
-from twitter_clone import app
 from flask import (g, request, session, redirect, render_template,
-                   flash, url_for, abort)
+                   flash, url_for)
+
+app = Flask(__name__)
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if 'username' in session:
-        return redirect(url_for('home'))
-    cur = g.db.cursor()
-    if request.method == 'POST':
-        user = request.form['username']
-        pw = md5(request.form['password'].encode('utf-8')).hexdigest()
-        cur.execute('SELECT * from user WHERE username = ? AND password = ?',
-                    (user, pw))
+def connect_db(db_name):
+    return sqlite3.connect(db_name)
 
-        fetched = cur.fetchone()
-        if fetched is None:
-            return "Invalid username or password"
-        fetched = list(fetched)
-        fetched.pop(2)
 
-        check_for = ['user_id','username','fname','lname','bdate']
-        session['logged_in'] = True
-        for idx, check in enumerate(check_for):
-            session[check] = fetched[idx]
-        return redirect(url_for('feed',username=session['username']))
-
-    return render_template('static_templates/login.html')
+@app.before_request
+def before_request():
+    g.db = connect_db(app.config['DATABASE'][1])
 
 
 def login_required(f):
@@ -41,31 +25,47 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if 'username' in session:
+        return redirect(url_for('home')), 302
+    cur = g.db.cursor()
+    if request.method == 'POST':
+        user = request.form['username']
+        pw = md5(request.form['password'].encode('utf-8')).hexdigest()
+        cur.execute('SELECT * from user WHERE username = ? AND password = ?',
+        (user, pw))
 
+        fetched = cur.fetchone()
+        if fetched is None:
+            return "Invalid username or password", 200
 
-def connect_db(db_name):
-    return sqlite3.connect(db_name)
+        session['logged_in'] = True
+        session['user_id'] = fetched[0]
+        session['username'] = fetched[1]
+        session['fname'] = fetched[3]
+        session['lname'] = fetched[4]
+        session['bdate'] = fetched[5]
+        return redirect(url_for('feed',username=session['username']))
 
-@app.before_request
-def before_request():
-    g.db = connect_db(app.config['DATABASE'][1])
+    return render_template('static_templates/login.html')
+
 
 @app.route('/<username>', methods=['GET'])
 def feed(username):
+    flash('Tweet deleted.')
     if 'username' not in session or session['username'] != username:
         return other_feed(username)
     else:
         return own_feed(username)
 
-
 def own_feed(username):
     user_id = session['user_id']
     cur = g.db.cursor()
-    cur.execute('SELECT id, content, created from tweet WHERE user_id = ? \
-                ORDER BY id DESC',(user_id,))
+    cur.execute('SELECT id, content, created from tweet WHERE user_id = ?', (user_id,))
     my_tweets = cur.fetchall()
     return render_template('static_templates/own_feed.html',
-                            username=username,tweets=my_tweets)
+    username=username,tweets=my_tweets)
 
 
 def other_feed(username):
@@ -80,30 +80,26 @@ def other_feed(username):
     user_id = fetched[0]
     user = fetched[1]
 
-    cur.execute('SELECT id,content,created from tweet WHERE user_id = ? \
-    ORDER BY id DESC',(user_id,))
+    cur.execute('SELECT id,content,created from tweet WHERE user_id = ?',
+    (user_id,))
 
     tweets = cur.fetchall()
     return render_template('static_templates/other_feed.html',
-                            me=me,username=user,tweets=tweets), 200
-
+    me=me,username=user,tweets=tweets), 200
 
 
 @app.route('/<username>', methods=['POST'])
+@login_required
 def post_tweet(username):
-    if 'username' not in session or username != session['username']:
-        abort(403)
     cur = g.db.cursor()
     tweet = request.form['tweet']
     user_id = session['user_id']
     cur.execute('INSERT INTO tweet ("user_id","content") VALUES (?, ?)',
-                (user_id, tweet))
+    (user_id, tweet))
+    if cur.rowcount != 1:
+        return redirect(url_for('home')), 403
     g.db.commit()
-    cur.execute('SELECT id, content, created FROM tweet WHERE user_id = ? \
-                ORDER BY id DESC',(user_id,))
-    my_tweets = cur.fetchall()
-    return render_template('static_templates/own_feed.html',username=username,
-                            tweets=my_tweets)
+    return redirect(url_for('home'))
 
 
 @app.route('/')
@@ -120,10 +116,12 @@ def delete_tweet(tweet_id):
     cur = g.db.cursor()
     if 'user_id' in session:
         user_id = session['user_id']
-        cur.execute('DELETE from tweet WHERE id = ?', (tweet_id,))
-        g.db.commit()
-        print(cur.execute('SELECT * from tweet').fetchall())
-
+        cur.execute('DELETE FROM tweet WHERE id = ? AND user_id = ?',
+        (tweet_id,user_id))
+    if cur.rowcount != 1:
+        return redirect(url_for('home')), 403
+    g.db.commit()
+    flash('Tweet deleted.')
     return redirect(url_for('home'))
 
 
@@ -133,7 +131,7 @@ def logout():
     session['logged_in'] = False
     session.pop('username', None)
     session.pop('user_id', None)
-#    flash('Logged out.')
+    flash('Logged out.')
     return redirect(url_for('home'))
 
 
@@ -141,10 +139,8 @@ def logout():
 @login_required
 def profile():
     return render_template('static_templates/profile.html',
-                            username = session['username'],
-                            birth_date = session['bdate'],
-                            first_name = session['fname'],
-                            last_name = session['lname'])
+    username = session['username'], birth_date = session['bdate'],
+    first_name = session['fname'], last_name = session['lname']), 200
 
 
 @app.route('/profile', methods=['POST'])
@@ -164,8 +160,4 @@ def edit_profile():
     cur.execute('UPDATE user SET "first_name" = ?, "last_name" = ?, "birth_date" = ? WHERE "username" = ?',
     (fname,lname,bdate,username))
     g.db.commit()
-    return render_template('static_templates/profile.html',
-                            username = session['username'],
-                            birth_date = session['bdate'],
-                            first_name = session['fname'],
-                            last_name = session['lname'])
+    return redirect(url_for('profile'))
