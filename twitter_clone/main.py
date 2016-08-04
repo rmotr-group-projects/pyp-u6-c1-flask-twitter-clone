@@ -3,7 +3,8 @@ from hashlib import md5
 from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
-                   flash, url_for)
+                   flash, url_for, abort)
+from hashlib import md5
 
 app = Flask(__name__)
 
@@ -15,10 +16,8 @@ def _hash_password(password):
     """
     Uses md5 hashing for now
     """
-    return md5(password.encode("utf-8").hexdigest())
-    
-#def _collect_tweet(user_id):
-#    
+    hexd =  md5(password.encode("utf-8"))
+    return hexd.hexdigest()
 
 
 @app.before_request
@@ -34,16 +33,13 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-#to add our current directory to pythonpath
-#PYTHONPATH=. python twitter_clone/runserver.py
-
-# implement your views here
 
 @app.route("/login/", methods = ["GET", "POST"])
 def login():
     """
     Log in page
     """
+         
     if request.method == 'GET':
         return render_template('login.html')
     
@@ -51,25 +47,21 @@ def login():
         
         username = request.form["username"]
         password = request.form["password"]
-        # hashedPassword = _hash_password(password)
-
-        #cursor = g.db.cursor()
-        #Parametetrize SQL queries to prevent sql injection
+        
         try:
+            hashedPassword = _hash_password(password)
             query = "SELECT id, username FROM user WHERE username = ? AND password = ?"
-            cursor = g.db.execute(query, (username, password))
-            # cursor = g.db.execute(query, (username, hashedPassword))
+            cursor = g.db.execute(query, (username, hashedPassword))
             results = cursor.fetchall()
-        # if results == None: # not this
-        #return username + password + str(results)  #empty list???
+            
             user_id = results[0][0]
             username = results[0][1]
             session["logged_in"] = True
             session["user_id"] = str(user_id)
             session["username"] = username
+            #return username
             return redirect(url_for('display_feed', username = session['username']))
         except: # here
-            
             return redirect(url_for('login'))
 
 def _is_user_page(username):
@@ -81,11 +73,13 @@ def _is_user_page(username):
 @app.route("/<username>", methods = ["GET", "POST"])
 @login_required
 def display_feed(username):
-    
-    if _is_user_page(username) == True:
+    #check if username is in database 
+    #return session['user_id']
+    if _is_user_page(username) is True:
         
         if request.method == 'GET':
             tweets = _retrieve_tweets(session['user_id'])
+            #return username
             return render_template('own_feed.html', tweets=tweets)
             
         if request.method == 'POST':
@@ -95,7 +89,7 @@ def display_feed(username):
             tweets = _retrieve_tweets(session['user_id'])
             return render_template('own_feed.html', tweets=tweets)
             
-    elif _is_user_page(username) == False:
+    else : #_is_user_page(username):
         if request.method == 'GET':
             user_id = _get_user_id(username)
             tweets = _retrieve_tweets(user_id)
@@ -103,8 +97,12 @@ def display_feed(username):
 
 @app.route("/tweets/<tweet_id>/delete", methods = ["POST"])    
 def delete(tweet_id):
-    _delete_tweet(tweet_id)
-    return redirect(url_for('own_feed', username = session['username']))
+    #TODO: Verify user owns tweet before deleting
+    if _is_tweet_owner(tweet_id):
+        _delete_tweet(tweet_id)
+        return redirect(url_for('display_feed', username = session['username']))
+    else:
+        abort(404)
 
 @app.route("/logout/")
 def logout():
@@ -116,7 +114,6 @@ def logout():
 def profile():
     if request.method == 'GET':
         profile_details = _get_profile_information(session['user_id'])
-        # return str(profile_details[0][1])
         return render_template('profile.html', first_name=profile_details[0][0], last_name=profile_details[0][1], birth_date=profile_details[0][2])
     if request.method == 'POST':
         username = request.form['username']
@@ -126,18 +123,6 @@ def profile():
         _profile_update(first_name, last_name, birth_date)
         return render_template('profile.html', first_name=first_name, last_name=last_name, birth_date=birth_date)
 
-# DROP TABLE if exists user;
-# CREATE TABLE user (
-#   id INTEGER PRIMARY KEY autoincrement,
-#   username TEXT NOT NULL,
-#   password TEXT NOT NULL,
-#   first_name TEXT,
-#   last_name TEXT,
-#   birth_date DATE,
-#   CHECK (
-#       length("birth_date") = 10
-#   )
-# );
 
     
 @app.route('/')
@@ -145,6 +130,19 @@ def profile():
 def homepage():
     return redirect(url_for('login'))
 
+
+def _is_tweet_owner(tweet_id):
+    """
+    Parameters: user = session["id], tweet id
+    Return: boolean. True if user owns the tweet. False otherwise
+    """
+    query = "SELECT user_id FROM tweet WHERE id = ?"
+    cursor = g.db.execute(query, (tweet_id,))
+    results = cursor.fetchall()
+    tweets_user_id = results[0][0]
+    return tweets_user_id == session["user_id"]
+   
+ 
 #SQL query helper functions
 def _post_tweet(user_id, tweet_text):
     query = 'INSERT INTO "tweet" ("user_id", "content") VALUES (?, ?)'
@@ -163,6 +161,7 @@ def _retrieve_tweets(user_id):
     return tweets
 
 def _get_user_id(username):
+    #Check if user exists
     query = "SELECT id FROM 'user' WHERE username = ?"
     cursor = g.db.execute(query, (username,))
     result = cursor.fetchall()
