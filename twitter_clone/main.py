@@ -5,7 +5,7 @@ from flask import Flask
 from flask import (g, request, session, redirect, render_template,
                    flash, url_for, abort)
 import re
-from auxiliary import (hash_function, get_user_tweets, string_transform,
+from .auxiliary import (hash_function, get_user_tweets, string_transform,
                         basic_query, basic_insert, transform_update_string, basic_update)
 
 
