@@ -103,18 +103,35 @@ def profile():
 @login_required
 def tweets(tweet_id):
     # try:
-    #     tweet_id = int(tweet_id)
+    #     tweet_id = int(tweet_i)d
     # except:
     #     pass 
     # print("404 error check:" + str(type(tweet_id)))
     # if not isinstance(tweet_id,int):
     #     abort(404)
+    print basic_query('tweet')
+    # ('tweet', 'user_id, created, content, id')
+    user_tweets = get_user_tweets(session['user_id'])
+    deletion_query = 'DELETE FROM tweet WHERE id = ?;'
+    for tweet in user_tweets:
+        print(tweet, tweet_id)
+        if tweet['tweet_id'] == tweet_id:
+            print(tweet, tweet_id)
+            g.db.execute(deletion_query, [tweet_id])
+            g.db.commit()
+    return redirect(url_for('index'))
+            
+    
+    
+'''      
     tweet_id = (tweet_id,)
     
     #test = g.db.execute("select * from tweet where user_id = {};".format(session['user_id']))
     #print(len(test.fetchall()))
     
     #query = 'SELECT id, user_id FROM tweet WHERE user_id ='+ str(session['user_id']) +';'
+
+ 
     query = 'SELECT id, user_id FROM tweet WHERE user_id = ?;'
     list_tweet_user_ids = g.db.execute(query,(str(session['user_id']),)).fetchall()
     for tweet_user_ids in list_tweet_user_ids:
@@ -127,7 +144,7 @@ def tweets(tweet_id):
     #print("Number1:", len(test1.fetchall()))
     
     return redirect(url_for('index')) #redirect(url_for('feed',username=session['username']))
-
+'''
 
 # Feed view ####################################################################
 @app.route('/<username>', methods=['GET', 'POST'])
