@@ -2,10 +2,11 @@ import sqlite3
 from hashlib import md5
 from functools import wraps
 from flask import Flask
-from twitter_clone import app
 from flask import (g, request, session, redirect, render_template,
                    flash, url_for, abort)
 
+
+app = Flask(__name__)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -85,7 +86,6 @@ def other_feed(username):
                             me=me,username=user,tweets=tweets), 200
 
 
-
 @app.route('/<username>', methods=['POST'])
 def post_tweet(username):
     if 'username' not in session or username != session['username']:
@@ -99,6 +99,7 @@ def post_tweet(username):
     cur.execute('SELECT id, content, created FROM tweet WHERE user_id = ? \
                 ORDER BY id DESC',(user_id,))
     my_tweets = cur.fetchall()
+    flash(u'You have successfully posted a new Tweet.', 'error')
     return render_template('static_templates/own_feed.html',username=username,
                             tweets=my_tweets)
 
@@ -114,14 +115,14 @@ def home():
 @app.route('/tweets/<int:tweet_id>/delete', methods=['POST'])
 @login_required
 def delete_tweet(tweet_id):
-    cur = g.db.cursor()
-    if 'user_id' not in session:
+    if 'username' not in session:
         abort(403)
+    cur = g.db.cursor()
     user_id = session['user_id']
     cur.execute('DELETE from tweet WHERE id = ? AND user_id = ?',
                 (tweet_id,user_id))
     g.db.commit()
-
+    flash(u'Tweet deleted.', 'error')
     return redirect(url_for('home'))
 
 
@@ -149,20 +150,16 @@ def profile():
 def edit_profile():
     cur = g.db.cursor()
 
-    username = request.form['username']
-    fname = request.form['first_name']
-    lname = request.form['last_name']
-    bdate = request.form['birth_date']
+    session['fname'] = request.form['first_name']
+    session['lname'] = request.form['last_name']
+    session['bdate'] = request.form['birth_date']
 
-    session['fname'] = fname
-    session['lname'] = lname
-    session['bdate'] = bdate
-
-    cur.execute('UPDATE user SET "first_name" = ?, "last_name" = ?, "birth_date" = ? WHERE "username" = ?',
-    (fname,lname,bdate,username))
+    cur.execute('''UPDATE user SET "first_name" = ?, "last_name" = ?,
+                                   "birth_date" = ? WHERE "username" = ?'''
+    ,(session['fname'],session['lname'],session['bdate'],session['username']))
     g.db.commit()
     return render_template('static_templates/profile.html',
                             username = session['username'],
                             birth_date = session['bdate'],
-                            first_name = session['fname'],
+                            first_name =session['fname'],
                             last_name = session['lname'])
