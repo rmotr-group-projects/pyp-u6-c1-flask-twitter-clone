@@ -5,7 +5,7 @@ import re
 
 # Abstracted hash function #####################################################
 def hash_function(text):
-    return md5(text).hexdigest()
+    return md5(text.encode('utf-8')).hexdigest()
 
 # Function to get a list of dict of tweets for a specific user #################
 def get_user_tweets(user_id):
