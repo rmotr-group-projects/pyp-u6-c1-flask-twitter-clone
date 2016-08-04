@@ -1,6 +1,6 @@
-from login import *
-from feed import *
-from modules import *
+from .login import login, login_required
+from .feed import other_feed, own_feed, feed
+from .modules import app
 
 import sqlite3
 from hashlib import md5
