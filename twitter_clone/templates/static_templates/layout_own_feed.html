@@ -1,0 +1,36 @@
+{% extends "static_templates/layout.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+            <div class="row">
+                <form role="form" action="" method="POST">
+        		    <div class="form-group">
+                        <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
+        		    </div>
+        		    <button type="submit" class="btn btn-info pull-right">Submit</button>
+        		</form>
+            </div>
+            <div class="row">
+
+                {% for index, tweet, timestamp in tweets %}
+
+                <div class="well well-large">
+
+                    <form action="/tweets/{{index}}/delete?next=http://localhost:8080/{{username}}" method="POST">
+                        <button type="submit" value="{{index}}" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                    </form>
+                    <div>
+                        <strong>@{{username}}</strong>
+                        <span class="label label-primary">{{timestamp}}</span>
+                    </div>
+                    <div>{{tweet}}</div>
+                </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
+{% endblock %}
