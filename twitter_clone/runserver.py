@@ -1,5 +1,4 @@
 import os
-
 from main import app
 import settings
 
