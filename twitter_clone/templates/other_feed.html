@@ -24,10 +24,12 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
-
+            {% if username != None %}
             <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i>{{ username }}</a></li>
             <li><a href="/logout?next=%2F{{ tweet_user }}"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
-
+            {% else %}
+            <li><a href="/login"><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
+            {% endif %}
       </ul>
     </div>
   </div>

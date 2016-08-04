@@ -3,7 +3,7 @@ from hashlib import md5
 from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
-                   flash, url_for)
+                   flash, url_for, abort)
 import re
 
 
@@ -96,28 +96,37 @@ def profile():
              
     return render_template('profile.html', user=user_data, success = succesful_profile_update)
 
+
 # Tweets view ##################################################################
-@app.route('/tweets/<tweet_id>/delete', methods=['GET', 'POST'])
+# I don't think POST actually happens here, does it?  C: I think it gave me an error if I didnt include it
+@app.route('/tweets/<int:tweet_id>/delete', methods=['GET', 'POST'])
+@login_required
 def tweets(tweet_id):
+    # try:
+    #     tweet_id = int(tweet_id)
+    # except:
+    #     pass 
+    # print("404 error check:" + str(type(tweet_id)))
+    # if not isinstance(tweet_id,int):
+    #     abort(404)
     tweet_id = (tweet_id,)
-    query = 'SELECT id, user_id FROM tweet WHERE user_id ='+ str(session['user_id']) +';'
-    list_tweet_user_ids = g.db.execute(query).fetchall()
+    
+    #test = g.db.execute("select * from tweet where user_id = {};".format(session['user_id']))
+    #print(len(test.fetchall()))
+    
+    #query = 'SELECT id, user_id FROM tweet WHERE user_id ='+ str(session['user_id']) +';'
+    query = 'SELECT id, user_id FROM tweet WHERE user_id = ?;'
+    list_tweet_user_ids = g.db.execute(query,(str(session['user_id']),)).fetchall()
     for tweet_user_ids in list_tweet_user_ids:
         if tweet_user_ids[0] == int(tweet_id[0]):
             query = 'DELETE FROM tweet WHERE id = ?;'
             g.db.execute(query, tweet_id)
             g.db.commit()
-
-    # '''Create separate function for this so can be reused'''    
-    # all_tweets = basic_query('tweet', 'user_id, created, content, id')
-    # user_tweets = []
-    # for tweet in all_tweets:
-    #     if session['user_id'] == tweet[0]:
-    #         user_tweets.append({'created':tweet[1], 'content':tweet[2], 'tweet_id':tweet[3]})
-    # user_tweets = user_tweets[::-1]
-    # return render_template('own_feed.html',username=session['username'], tweets=user_tweets)
+            
+    #test1 = g.db.execute("select * from tweet where user_id = {};".format(session['user_id']))
+    #print("Number1:", len(test1.fetchall()))
     
-    return redirect(url_for('feed',username=session['username']))
+    return redirect(url_for('index')) #redirect(url_for('feed',username=session['username']))
 
 
 # Feed view ####################################################################
@@ -140,7 +149,16 @@ def feed(username):
     #print("This is the form:" + request.form)
     # i think the error can be fixed for the test case of 302 != 403 if we put a condition to check to see
     # if request.form['username'] == session['username']
+    # We need to set up error handling using abort(), I pasted the link that way ---->
     if request.method == 'POST':
+        
+        # There's probably a more elegant way of doing this..
+        try:
+            if username != session['username']:
+                abort(403)
+        except:
+            abort(403)
+            
         tweet_text = str(request.form['tweet'])
 
         '''Hard coded version'''
@@ -158,9 +176,12 @@ def feed(username):
     # Yeah, I think it's redundant
     if 'username' in session and session['username'] == username:
         return render_template('own_feed.html', username=session['username'], tweets=user_tweets)
-    else:
+    elif 'username' in session:
         return render_template('other_feed.html', username=session['username'], tweet_user=username, tweets=user_tweets)
+    else:
+        return render_template('other_feed.html', username=None, tweet_user=username, tweets=user_tweets)
 
+        
 # Logout view ##################################################################
 @app.route('/logout')
 def logout(next=None):
@@ -171,9 +192,11 @@ def logout(next=None):
         return redirect(next)
     return redirect(url_for('index'))
 
+
 # Abstracted hash function #####################################################
 def hash_function(text):
     return md5(text).hexdigest()
+
 
 # Function to get a list of dict tweets for a specific user
 def get_user_tweets(user_id):
@@ -188,6 +211,7 @@ def get_user_tweets(user_id):
             user_tweets.append({'created':tweet[1], 'content':tweet[2], 'tweet_id':tweet[3]})
     return user_tweets[::-1]
 
+
 # Determines whether a piece of data is string or some iterable type, returns string if iterable, raise error if not string or iterable type
 def string_transform(data, iterable_type):
     if isinstance(data, iterable_type):
@@ -197,6 +221,7 @@ def string_transform(data, iterable_type):
     else:
         raise AttributeError
 
+
 # Basic query that gets back column from a table, if column is not specified, then * will be used
 def basic_query(table, columns = '*'):
     columns_string = string_transform(columns, list)
@@ -204,6 +229,7 @@ def basic_query(table, columns = '*'):
     cursor = g.db.execute('SELECT {cn} FROM {tb};'.format(tb=table, cn=columns_string))
     query_result = cursor.fetchall()
     return query_result
+
 
 # Basic insert, columns can be strings, but content has to be tuple matching string or tuple passed
 def basic_insert(table, columns, content):
@@ -219,6 +245,7 @@ def basic_insert(table, columns, content):
         g.db.commit()
         #g.db.execute('INSERT INTO ? ? VALUES ?;' (table, columns_tuple, content))
     return
+
 
 # Used by basic_update() to properly enclose strings in quotes
 def transform_update_string(parameter):
