@@ -206,7 +206,6 @@ class TweetsTestCase(BaseTwitterCloneTestCase):
 
             # pre condition, must be 2 tweets
             cursor = self.db.execute("select * from tweet where user_id = 1;")
-            print(self.db.execute('SELECT * from tweet').fetchall())
             self.assertEqual(len(cursor.fetchall()), 2)
 
             # delete tweet with id=1
