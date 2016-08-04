@@ -24,8 +24,8 @@ def login():
         fetched = list(fetched)
         fetched.pop(2)
 
-        check_for = ['user_id','username','fname','lname','bdate']
         session['logged_in'] = True
+        check_for = ['user_id','username','fname','lname','bdate']
         for idx, check in enumerate(check_for):
             session[check] = fetched[idx]
         return redirect(url_for('feed',username=session['username']))
@@ -40,8 +40,6 @@ def login_required(f):
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
-
-
 
 def connect_db(db_name):
     return sqlite3.connect(db_name)
@@ -69,10 +67,9 @@ def own_feed(username):
 
 
 def other_feed(username):
+    me = ''
     if 'username' in session:
         me = session['username']
-    else:
-        me = ''
     cur = g.db.cursor()
     cur.execute('SELECT id, username from user WHERE username = ?',
     (username,))
@@ -118,11 +115,12 @@ def home():
 @login_required
 def delete_tweet(tweet_id):
     cur = g.db.cursor()
-    if 'user_id' in session:
-        user_id = session['user_id']
-        cur.execute('DELETE from tweet WHERE id = ?', (tweet_id,))
-        g.db.commit()
-        print(cur.execute('SELECT * from tweet').fetchall())
+    if 'user_id' not in session:
+        abort(403)
+    user_id = session['user_id']
+    cur.execute('DELETE from tweet WHERE id = ? AND user_id = ?',
+                (tweet_id,user_id))
+    g.db.commit()
 
     return redirect(url_for('home'))
 
@@ -133,7 +131,6 @@ def logout():
     session['logged_in'] = False
     session.pop('username', None)
     session.pop('user_id', None)
-#    flash('Logged out.')
     return redirect(url_for('home'))
 
 
