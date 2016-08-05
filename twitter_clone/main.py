@@ -42,22 +42,15 @@ def login():
          
     if request.method == 'GET':
         #check if user is already logged in first, and if they are, redirect
-        try:
-            if session["logged_in"]:
-                response = Response(response = redirect(url_for('homepage', username = session['username'])) , status = 302)
-                response.headers['location'] = "/"
-            # response = Response(response = redirect(url_for('homepage', username = session['username'])), Location = url_for('display_feed', username = session['username']), status = 302)
-                return response
-        except:
-            return render_template('login.html')
-        # response = Response(response = render_template('login.html'), status = 200)
-        # return response
+        if 'logged_in' in session:
+            response = Response(response = redirect(url_for('homepage', username = session['username'])) , status = 302)
+            response.headers['location'] = "/"
+            return response
+        return render_template('login.html')
     
     elif request.method == "POST":
-        
         username = request.form["username"]
         password = request.form["password"]
-        
         
         try:
             hashedPassword = _hash_password(password)
@@ -70,37 +63,24 @@ def login():
             session["logged_in"] = True
             session["user_id"] = (user_id)
             session["username"] = username
-            #return username
             response = Response(response = redirect(url_for('display_feed', username = session['username'])), status = 200)
-            # return redirect(url_for('display_feed', username = session['username']))
             return response
         except: # here
-        
-            # return redirect(url_for('login')), 200
             return 'Invalid username or password', 200
-def _is_users_own_timeline(username):
-    """
-    Checks to see if the user is visiting his/her own timeline
-    """
-    return session['username']
+
 @app.route("/<username>", methods = ["GET", "POST"])
-# @login_required
 def display_feed(username):
-    #check if username is in database 
-    #return session['user_id']
+    #check if user is logged in as the page that they are visiting
     if 'username' in session:
         if session['username'] == username:
     
             if request.method == 'GET':
                 tweets = _retrieve_tweets(session['user_id'])
-                #return username
                 response = Response(response = render_template('own_feed.html', tweets=tweets), status = 200)
                 return response
                 
             if request.method == 'POST':
-                #check if tweet is less than 140 chars, otherwise spit a message
                 _post_tweet(session['user_id'], request.form['tweet'])
-                # want to upload request.form['tweet'] = tweet text, need user_id that posted it
                 tweets = _retrieve_tweets(session['user_id'])
                 response = Response(response = render_template('own_feed.html', tweets=tweets), status = 200)
                 return response
@@ -121,22 +101,21 @@ def display_feed(username):
 
 @app.route("/tweets/<tweet_id>/delete", methods = ["POST"])
 def delete(tweet_id):
-    #TODO: Verify user owns tweet before deleting
+
+    #if the user is not logged in, and tries to delete invalid tweet id
     if not _tweet_exists(tweet_id) and 'username' not in session:
-        #if the user is not logged in, and tries to delete invalid tweet id
         abort(404)
+    #if the user is just not logged in
     if 'username' not in session:
-        #if the user is just not logged in
         return redirect(url_for('login', next=request.url)), 302
+    #if the user tries to delete invalid tweet
     if not _tweet_exists(tweet_id):
-        #if the user tries to delete invalid tweet
         abort(404)
-    if _tweet_exists(tweet_id):
-        if _is_tweet_owner(tweet_id):
-            _delete_tweet(tweet_id)
-            response = Response(response = redirect(url_for('display_feed', username = session['username'])), status = 302)
-            response.headers['location'] = "/"
-            return response
+    if _is_tweet_owner(tweet_id):
+        _delete_tweet(tweet_id)
+        response = Response(response = redirect(url_for('display_feed', username = session['username'])), status = 302)
+        response.headers['location'] = "/"
+        return response
 
 @app.route("/logout")
 def logout():
@@ -159,10 +138,7 @@ def profile():
         
         return render_template('profile.html', first_name=first_name, last_name=last_name, birth_date=birth_date)
 
-
-    
 @app.route('/')
-#@login_required()
 def homepage():
     return redirect(url_for('login'))
 
