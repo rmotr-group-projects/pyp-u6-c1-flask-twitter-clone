@@ -155,6 +155,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
 
     def test_feed_not_authenticated_post(self):
         response = self.client.post('/testuser1', data={'tweet': 'This tweet is new'})
+        
         self.assertEqual(response.status_code, 403)
 
 
