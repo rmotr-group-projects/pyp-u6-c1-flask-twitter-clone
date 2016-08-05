@@ -90,6 +90,7 @@ def display_feed(username):
                 user_id = _get_user_id(username)
                 tweets = _retrieve_tweets(user_id)
                 return render_template('other_feed.html', tweets=tweets, username=username)
+    #if user is not logged in 
     else: 
         if request.method == 'GET':
             user_id = _get_user_id(username)
@@ -101,16 +102,18 @@ def display_feed(username):
 
 @app.route("/tweets/<tweet_id>/delete", methods = ["POST"])
 def delete(tweet_id):
-
     #if the user is not logged in, and tries to delete invalid tweet id
     if not _tweet_exists(tweet_id) and 'username' not in session:
         abort(404)
+        
     #if the user is just not logged in
     if 'username' not in session:
         return redirect(url_for('login', next=request.url)), 302
+        
     #if the user tries to delete invalid tweet
     if not _tweet_exists(tweet_id):
         abort(404)
+        
     if _is_tweet_owner(tweet_id):
         _delete_tweet(tweet_id)
         response = Response(response = redirect(url_for('display_feed', username = session['username'])), status = 302)
@@ -127,7 +130,11 @@ def logout():
 def profile():
     if request.method == 'GET':
         profile_details = _get_profile_information(session['user_id'])
-        response = Response( response = render_template('profile.html', first_name=profile_details[0][0], last_name=profile_details[0][1], birth_date=profile_details[0][2]), status = 200)
+        response = Response( response = render_template('profile.html', 
+                                        first_name=profile_details[0][0], 
+                                        last_name=profile_details[0][1], 
+                                        birth_date=profile_details[0][2]), 
+                                        status = 200 )
         return response
     if request.method == 'POST':
         username = request.form['username']
