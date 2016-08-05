@@ -128,7 +128,7 @@ def delete(tweet_id):
     if 'username' not in session:
         #if the user is just not logged in
         return redirect(url_for('login', next=request.url)), 302
-    if not _tweet_exist(tweet_id):
+    if not _tweet_exists(tweet_id):
         #if the user tries to delete invalid tweet
         abort(404)
     if _tweet_exists(tweet_id):
