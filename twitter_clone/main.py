@@ -184,7 +184,6 @@ def _tweet_exists(tweet_id):
     results = cursor.fetchone()
     
     if results is None:
-        print "Hi"
         return False
     return True
 
