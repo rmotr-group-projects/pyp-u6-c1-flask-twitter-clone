@@ -28,33 +28,33 @@ CREATE TABLE tweet (
   )
 );
 
-INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (10, "martinzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-01-26");
-INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (11, "ivanzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-07-06");
-INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (12, "doge", '89f288757f4d0693c99b007855fc075e', "2016-07-06");
-INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (13, "doge 🐶🐶🐶🐶", "2" , "2016-07-06");
-INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (14, "stephenspears", '89f288757f4d0693c99b007855fc075e', "2016-07-29");
+-- INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (10, "martinzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-01-26");
+-- INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (11, "ivanzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-07-06");
+-- INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (12, "doge", '89f288757f4d0693c99b007855fc075e', "2016-07-06");
+-- INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (13, "doge 🐶🐶🐶🐶", "2" ,"2016-07-06");
+-- INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (14, "stephenspears", '89f288757f4d0693c99b007855fc075e', "2016-07-29");
 
-INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Hello World!");
-INSERT INTO "tweet" ("user_id", "content") VALUES (10, "This is so awesome");
-INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Testing twitter clone");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Hello World!");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (10, "This is so awesome");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Testing twitter clone");
 
-INSERT INTO "tweet" ("user_id", "content") VALUES (11, "Yo, whats up!");
-INSERT INTO "tweet" ("user_id", "content") VALUES (11, "This is so rightous");
-INSERT INTO "tweet" ("user_id", "content") VALUES (11, "Testing twitter OUR clone");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (11, "Yo, whats up!");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (11, "This is so rightous");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (11, "Testing twitter OUR clone");
 
-INSERT INTO "tweet" ("user_id", "content") VALUES (12, "I love DOGE");
-INSERT INTO "tweet" ("user_id", "content") VALUES (12, "DOGEE ♥ ♥ ♥ ");
-INSERT INTO "tweet" ("user_id", "content") VALUES (12, "Shibas and corgis are my favourite");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (12, "I love DOGE");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (12, "DOGEE ♥ ♥ ♥ ");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (12, "Shibas and corgis are my favourite");
 
 
-INSERT INTO "tweet" ("user_id", "content") VALUES (13, "I am a cute DOGE");
-INSERT INTO "tweet" ("user_id", "content") VALUES (13, "woof woof ");
-INSERT INTO "tweet" ("user_id", "content") VALUES (13, "🐶🐶🐶🐶🐶");
-INSERT INTO "tweet" ("user_id", "content") VALUES (13, "dude what time is it?");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (13, "I am a cute DOGE");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (13, "woof woof ");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (13, "🐶🐶🐶🐶🐶");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (13, "dude what time is it?");
 
-INSERT INTO "tweet" ("user_id", "content") VALUES (14, "How am I suppposed to know the answer");
-INSERT INTO "tweet" ("user_id", "content") VALUES (14, "When I don't know the question.");
-INSERT INTO "tweet" ("user_id", "content") VALUES (14, "Here we are now.");
--- SELECT * FROM tweet;
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (14, "How am I suppposed to know the answer");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (14, "When I don't know the question.");
+-- INSERT INTO "tweet" ("user_id", "content") VALUES (14, "Here we are now.");
+-- -- SELECT * FROM tweet;
 -- 🐶
   

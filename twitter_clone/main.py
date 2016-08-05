@@ -29,7 +29,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
-            return redirect(url_for('login', next=request.url)), 403 
+            return redirect(url_for('login', next=request.url)), 302
         return f(*args, **kwargs)
     return decorated_function
 
@@ -82,70 +82,81 @@ def _is_users_own_timeline(username):
     """
     Checks to see if the user is visiting his/her own timeline
     """
-    try:
-        if session['username'] is username:
-            return True
-    except:
-        return False
-
+    return session['username']
 @app.route("/<username>", methods = ["GET", "POST"])
-@login_required
+# @login_required
 def display_feed(username):
     #check if username is in database 
     #return session['user_id']
-    return 301
-    if _is_users_own_timeline(username):
-        
-        if request.method == 'GET':
-            tweets = _retrieve_tweets(session['user_id'])
-            #return username
-            response = Response(response = render_template('own_feed.html', tweets=tweets), status = 200)
-            return response
-            
-        if request.method == 'POST':
-            #check if tweet is less than 140 chars, otherwise spit a message
-            _post_tweet(session['user_id'], request.form['tweet'])
-            # want to upload request.form['tweet'] = tweet text, need user_id that posted it
-            tweets = _retrieve_tweets(session['user_id'])
-            response = Response(response = render_template('own_feed.html', tweets=tweets), status = 200)
-            return response
-            
-    elif not _is_users_own_timeline(username):
-        
+    if 'username' in session:
+        if session['username'] == username:
+    
+            if request.method == 'GET':
+                tweets = _retrieve_tweets(session['user_id'])
+                #return username
+                response = Response(response = render_template('own_feed.html', tweets=tweets), status = 200)
+                return response
+                
+            if request.method == 'POST':
+                #check if tweet is less than 140 chars, otherwise spit a message
+                _post_tweet(session['user_id'], request.form['tweet'])
+                # want to upload request.form['tweet'] = tweet text, need user_id that posted it
+                tweets = _retrieve_tweets(session['user_id'])
+                response = Response(response = render_template('own_feed.html', tweets=tweets), status = 200)
+                return response
+                
+        else:
+            if request.method == 'GET':
+                user_id = _get_user_id(username)
+                tweets = _retrieve_tweets(user_id)
+                return render_template('other_feed.html', tweets=tweets, username=username)
+    else: 
         if request.method == 'GET':
             user_id = _get_user_id(username)
             tweets = _retrieve_tweets(user_id)
-            return render_template('other_feed.html', tweets=tweets, username=username), 301
-        if request.method == "POST":
-            response = Response(response = "liar", status = 403)
-    return 301
+            return render_template('other_feed.html', tweets=tweets, username=username)
+            
+        elif request.method == "POST":
+            return redirect(url_for('login', next=request.url)), 403
 
-@app.route("/tweets/<tweet_id>/delete", methods = ["POST"])    
+@app.route("/tweets/<tweet_id>/delete", methods = ["POST"])
 def delete(tweet_id):
     #TODO: Verify user owns tweet before deleting
-    if _is_tweet_owner(tweet_id):
-        _delete_tweet(tweet_id)
-        return redirect(url_for('display_feed', username = session['username']))
-    else:
+    if not _tweet_exists(tweet_id) and 'username' not in session:
+        #if the user is not logged in, and tries to delete invalid tweet id
         abort(404)
+    if 'username' not in session:
+        #if the user is just not logged in
+        return redirect(url_for('login', next=request.url)), 302
+    if not _tweet_exist(tweet_id):
+        #if the user tries to delete invalid tweet
+        abort(404)
+    if _tweet_exists(tweet_id):
+        if _is_tweet_owner(tweet_id):
+            _delete_tweet(tweet_id)
+            response = Response(response = redirect(url_for('display_feed', username = session['username'])), status = 302)
+            response.headers['location'] = "/"
+            return response
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for('homepage')), 302
 
-@app.route("/profile/", methods = ['GET', 'POST'])
+@app.route("/profile", methods = ['GET', 'POST'])
 @login_required
 def profile():
     if request.method == 'GET':
         profile_details = _get_profile_information(session['user_id'])
-        return render_template('profile.html', first_name=profile_details[0][0], last_name=profile_details[0][1], birth_date=profile_details[0][2])
+        response = Response( response = render_template('profile.html', first_name=profile_details[0][0], last_name=profile_details[0][1], birth_date=profile_details[0][2]), status = 200)
+        return response
     if request.method == 'POST':
         username = request.form['username']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         birth_date = request.form['birth_date']
         _profile_update(first_name, last_name, birth_date)
+        
         return render_template('profile.html', first_name=first_name, last_name=last_name, birth_date=birth_date)
 
 
@@ -165,8 +176,18 @@ def _is_tweet_owner(tweet_id):
     cursor = g.db.execute(query, (tweet_id,))
     results = cursor.fetchall()
     tweets_user_id = results[0][0]
-    return tweets_user_id == session["user_id"]
-   
+    return int(tweets_user_id) == session["user_id"]
+
+def _tweet_exists(tweet_id):
+    query = "SELECT * FROM tweet WHERE id = ?"
+    cursor = g.db.execute(query, (tweet_id,))
+    results = cursor.fetchone()
+    
+    if results is None:
+        print "Hi"
+        return False
+    return True
+
  
 #SQL query helper functions
 def _post_tweet(user_id, tweet_text):
@@ -213,6 +234,7 @@ def _get_profile_information(user_id):
     cursor = g.db.execute(query, (user_id,))
     results = cursor.fetchall()
     return results
+
 
 if __name__ == "__main__":
     app.run()
