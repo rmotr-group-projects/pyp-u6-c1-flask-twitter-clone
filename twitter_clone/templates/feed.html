@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+            <div class="row">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-8">
+                    
+                    {% if logged_in == username %}
+                    <div class="row">
+                        <form role="form" action="" method="POST">
+                		  <div class="form-group">
+                            <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
+                		  </div>
+                		  <button type="submit" class="btn btn-info pull-right">Submit</button>
+                		</form>
+                    </div> <!-- new tweet form block -->
+                    {% endif %}
+            
+            
+                    <div class="row"> <!-- start of tweets -->
+                    
+                    <!--
+                    sqlite> select * from tweet;
+                    1|10|2016-07-30 21:22:56|Hello World!
+                    2|10|2016-07-30 21:22:56|This is so awesome
+                    3|10|2016-07-30 21:22:59|Testing twitter clone
+                    id, user_id, created, content
+                    -->
+                    
+            
+                       {% for tweet in tweets %} 
+                        <div class="well well-large">
+                            {% if logged_in == username %}
+                            <form action="/tweets/{{ tweet['id'] }}/delete" method="POST">
+                                <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                            </form> <!-- tweet delete button block -->
+                            {% endif %}
+            
+                            <div>
+                                <strong>@{{ username }}</strong>
+                                <span class="label label-primary">{{ tweet['created'] }}</span>
+                            </div>
+                            <div>
+                                {{ tweet['content'] }}
+                            </div> <!-- tweet body -->
+                        </div> <!-- tweet -->
+                        {% endfor %}
+            
+            
+                    </div> <!-- end of tweets -->
+                </div>
+                <div class="col-sm-2"></div>
+            </div>
+{% endblock %}
