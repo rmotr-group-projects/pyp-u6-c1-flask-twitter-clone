@@ -1,5 +1,5 @@
 import sqlite3
-import settings
+# import settings
 from hashlib import md5
 from functools import wraps
 from flask import Flask
@@ -56,7 +56,7 @@ def login():
             return "Login failed - username cannot be blank"
         if len(submitted_password) == 0:
             return "Login failed - password cannot be blank"
-        hashed_password = md5(submitted_password).hexdigest()
+        hashed_password = md5(submitted_password.encode(request.charset)).hexdigest()
         sql_string = '''
             SELECT * from user;
         '''
