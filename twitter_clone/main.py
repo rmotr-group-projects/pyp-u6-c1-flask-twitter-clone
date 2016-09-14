@@ -110,3 +110,12 @@ def logout():
     session.pop('user_id', None)
     session.pop('username', None)
     return redirect('http://localhost/') #not sure if this is correct implementation
+
+
+@app.route('/tweets/<tweet_id>/delete')
+@login_required
+def delete_tweet(tweet_id, username):
+    sql_statement = "DELETE FROM tweet WHERE id={}".format(tweet_id)
+    cursor = g.database.execute(sql_statement)
+    return redirect(url_for('own_feed', username=username))
+    

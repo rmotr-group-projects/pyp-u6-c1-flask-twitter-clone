@@ -54,7 +54,8 @@
             {% for tweet in data %}
             
                 <div class=well well-large>
-                    <form action="/tweets/{{ tweet[2] }}/delete?next=http://localhost:8080/{{ tweet[1] }}" method="POST">
+                    <!--<form action="/tweets/{{ tweet[2] }}/delete?next=http://localhost:8080/{{ tweet[1] }}" method="POST">-->
+                    <form action="{{ url_for('delete_tweet', tweet_id = tweet[2], username = tweet[1]) }}" method="POST">
                         <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
                     </form>
                         <div>

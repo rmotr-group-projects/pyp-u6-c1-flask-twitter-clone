@@ -63,3 +63,6 @@ target/
 
 *.db
 .DS_Store
+
+
+twitter_clone/.~c9*
