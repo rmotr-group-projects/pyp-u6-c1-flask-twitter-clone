@@ -19,6 +19,7 @@ def login_required(f):
 
 
 # implement your views here
+#login in/out views
 @app.route('/')
 @login_required
 def homepage():
@@ -48,7 +49,41 @@ def logout():
     session.pop('user_id', None)
     return redirect(url_for('homepage'))
 
+#tweet views here
+@app.route('/<username>', methods=['GET', 'POST'])
+def user_feeds(username):
+    right_user = False
+    if session:
+        if session['username'] == username:
+            right_user = True
+    id = convert_username_to_id(username)
+    if request.method == 'POST':
+        if username!=session['username']:
+            abort(403)
+        new_tweet = str(request.form['tweet'])
+        g.db.execute('INSERT INTO tweet ("user_id", "content") \
+        VALUES ({}, {})'.format(id, new_tweet))
+    tweets = get_tweets(id)
+    return render_template('own_feed.html', right_user=right_user, username=username, tweets=tweets)
 
+def convert_username_to_id(username):
+    users_cursor = g.db.execute('SELECT * FROM user')
+    users_data = users_cursor.fetchall()
+    for x in users_data:
+        if username in x:
+            return x[0]
+
+def get_tweets(id):
+    tweets_cursor = g.db.execute('SELECT * FROM tweet')
+    tweets_data = tweets_cursor.fetchall()
+    tweets_list=[]
+    for x in tweets_data:
+        if id in x:
+            tweets_list.append(x)
+    return tweets_list
+
+
+#database operations
 def connect_db(db_name):
     return sqlite3.connect(db_name)
 
@@ -70,6 +105,5 @@ def valid_login(par, param):
     users_data = users_cursor.fetchall()
     for x in users_data:
         if par in x and param in x:
-            print("ayto einai to id:" + str(x[0]))
             return x[0]
     return False

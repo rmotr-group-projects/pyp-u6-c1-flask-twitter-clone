@@ -54,7 +54,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
         self.assertIn('<form', response.data)
         self.assertEqual(response.status_code, 200)
 
-    def test_authenticated_login_redirects_next(self):############################################
+    def test_authenticated_login_redirects_next(self):
         with app.test_client() as client:
             client.post('/login',
                         data={'username': 'testuser1',
@@ -99,7 +99,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
             self.assertFalse('username' in session)
 
 
-class FeedTestCase(BaseTwitterCloneTestCase):
+class FeedTestCase(BaseTwitterCloneTestCase):####################
 
     def test_feed_not_authenticated_readonly(self):
         response = self.client.get('/testuser1')
