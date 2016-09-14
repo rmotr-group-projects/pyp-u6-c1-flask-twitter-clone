@@ -20,15 +20,15 @@ def validate(username, password):
         cur.execute("SELECT * FROM user")
         rows = cur.fetchall()
         for row in rows:
-            user = row[0]
-            passw = row[1]
+            user = row[1] 
+            passw = row[2] 
             if user == username:
                 validation = check_password(passw, password)
     return validation
 
 
 def check_password(hashed_password, user_password):
-    return hashed_password == md5(user_password.encode().hexdigest())
+    return hashed_password == md5(user_password.encode()).hexdigest()
 
 
 @app.before_request
@@ -45,6 +45,12 @@ def login_required(f):
     return decorated_function
 
 
+@app.route('/')
+@login_required
+def homepage():
+    return render_template('own_feed.html')
+
+
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
     error = None
@@ -54,14 +60,14 @@ def login():
         validation = validate(username, password)
         if validation == False:
             error = ' - Login Failed'
-        else:
-            session['logged in'] = True
-            flash('Logged in successfully')
+        else:                                   
+            session['username'] = True
             return redirect(url_for('own_feed'))
     return render_template('/static_templates/login.html', error = error)
 
 
 @app.route('/own_feed', methods = ['GET', 'POST'])
+@login_required
 def own_feed():
     return render_template('/static_templates/own_feed.html')
 
