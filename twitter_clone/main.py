@@ -159,6 +159,8 @@ def own_feed(username):
         return render_template('static_templates/own_feed.html', username=username, tweets=tweets)
 
 
+
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -177,7 +179,7 @@ def logout():
     return redirect('/') #not sure if this is correct implementation
 
 
-@app.route('/tweets/<tweet_id>/delete', methods=['GET', 'POST'])
+@app.route('/tweets/<int:tweet_id>/delete', methods=['GET', 'POST'])
 @login_required
 def delete_tweet(tweet_id):
     sql_statement = "DELETE FROM tweet WHERE id = ?"
@@ -185,6 +187,7 @@ def delete_tweet(tweet_id):
     g.db.commit()
     # return redirect(url_for('own_feed', username=session['username']))
     return redirect('http://localhost/')
+
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
