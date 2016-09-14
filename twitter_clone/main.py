@@ -1,4 +1,5 @@
 import sqlite3
+from operator import itemgetter
 from hashlib import md5
 from functools import wraps
 from flask import Flask
@@ -48,8 +49,10 @@ def login_required(f):
 @app.route('/')
 @login_required
 def homepage():
-    return redirect(url_for('own_feed'))
-
+    if session['username']:
+        return own_feed(session['username'])
+    else:
+        redirect(url_for('login'))
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -63,7 +66,7 @@ def login():
             error = ' - Login Failed'
         else:
             session['username'] = username
-            return redirect(url_for('own_feed'))
+            return redirect(url_for('own_feed', username = username))
     return render_template('/static_templates/login.html', error = error)
 
 
@@ -73,12 +76,38 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/own_feed', methods = ['GET', 'POST'])
+@app.route('/<username>', methods = ['GET', 'POST'])
 @login_required
-def own_feed():
-    cursor = g.db.execute('SELECT t.id, t.user_id, t.created, t.content, u.username FROM tweet t INNER JOIN user u ON t.user_id = u.id WHERE u.username = "{0}";'.format(session['username']))
-    tweets = [dict(id = row[0], user_id = row[1], created = row[2], content = row[3]) for row in cursor.fetchall()]
-    return render_template('/static_templates/own_feed.html', tweets = tweets)
+def own_feed(username):
+    if session['username'] == username:
+        if request.method == 'GET':
+            sorted_tweets = sorted(_get_tweets_from_db(username), key=itemgetter('created'), reverse=True)
+            return render_template('/static_templates/own_feed.html', tweets = sorted_tweets, username = username)
+        if request.method == 'POST':
+            g.db.execute('INSERT INTO tweet(user_id, content) VALUES((SELECT id FROM user WHERE username = "{0}"), "{1}");'.format(session['username'], request.form.get('content', type=str)))
+            g.db.commit()
+            sorted_tweets = sorted(_get_tweets_from_db(username), key=itemgetter('created'), reverse=True)
+            return render_template('/static_templates/own_feed.html', tweets=sorted_tweets, username=username)
+    else:
+        sorted_tweets = sorted(_get_tweets_from_db(username), key=itemgetter('created'), reverse=True)
+        return render_template('/static_templates/other_feed.html', tweets = sorted_tweets)
+
+
+def _get_tweets_from_db(username):
+    cursor = g.db.execute(
+        'SELECT t.id, t.user_id, t.created, t.content, u.username FROM tweet t INNER JOIN user u ON t.user_id = u.id WHERE u.username = "{0}";'.format(
+            session['username']))
+    tweets = [dict(id=row[0], user_id=row[1], created=row[2], content=row[3], username=row[4]) for row in
+              cursor.fetchall()]
+    return tweets
+
+
+@app.route('/tweets/<tweet_id>/delete', methods = ['POST'])
+@login_required
+def delete_tweet(tweet_id):
+    g.db.execute('DELETE FROM tweet WHERE id = {}'.format(tweet_id))
+    g.db.commit()
+    return redirect(url_for('own_feed'))
 
 
 @app.route('/profile', methods = ['GET'])

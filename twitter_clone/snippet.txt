@@ -1,0 +1,4 @@
+def my_md5(string):
+  if some problem because of python version:
+    fix string
+  return md5(string).hexdigest()
