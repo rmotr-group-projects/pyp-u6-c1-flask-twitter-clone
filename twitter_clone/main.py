@@ -28,7 +28,7 @@ def homepage():
 def login():
     error = None
     if request.method == 'POST':
-        x = valid_login(request.form['username'], "{}".format(md5(request.form['password']).hexdigest()))γιτ
+        x = valid_login(request.form['username'], "{}".format(md5(request.form['password']).hexdigest()))
         if x:
             #log_the_user_in(request.form['username'])
             session['username'] = request.form['username']
@@ -37,14 +37,15 @@ def login():
         else:
             error = 'Invalid username or password'
             flash(error, category='message')
-            #return redirect(url_for('login'), code=302, )
+    if request.method == 'GET' and session:
+        return redirect(url_for('homepage'))
     # the code below is executed if the request method  was GET or the credentials were invalid
     return render_template('login.html', error=error)
 
 @app.route('/logout')
 def logout():
-    session['username'] = None
-    session['user_id'] = None
+    session.pop("username", None)
+    session.pop('user_id', None)
     return redirect(url_for('homepage'))
 
 
