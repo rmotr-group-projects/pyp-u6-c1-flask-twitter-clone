@@ -33,11 +33,11 @@ def login():
             #log_the_user_in(request.form['username'])
             session['username'] = request.form['username']
             session['user_id'] = x
-            return redirect('homepage', code=302)
+            return redirect(url_for('homepage'), code=302)
         else:
             error = 'Invalid username or password'
             flash(error, category='message')
-            return redirect(url_for('login'), code=302, )
+            #return redirect(url_for('login'), code=302, )
     # the code below is executed if the request method  was GET or the credentials were invalid
     return render_template('login.html', error=error)
 

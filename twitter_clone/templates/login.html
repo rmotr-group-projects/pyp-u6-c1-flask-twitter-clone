@@ -35,6 +35,9 @@
 
 
 <div class="row">
+    {% if error%}
+    <div>{{ error }}</div>
+    {% endif %}
     <div class="col-md-12">
         <form role="form" action="" method="POST">
 		  <div class="form-group">
