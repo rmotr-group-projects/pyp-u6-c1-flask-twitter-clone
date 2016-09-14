@@ -28,7 +28,7 @@ def homepage():
 def login():
     error = None
     if request.method == 'POST':
-        x = valid_login(request.form['username'], request.form['password'])
+        x = valid_login(request.form['username'], "{}".format(md5(request.form['password']).hexdigest()))γιτ
         if x:
             #log_the_user_in(request.form['username'])
             session['username'] = request.form['username']
@@ -63,12 +63,12 @@ def teardown_request(exception):
         db.close()
 
 
-def valid_login(par , param):
+def valid_login(par, param):
     #curs = g.db.cursor()
     users_cursor = g.db.execute('SELECT * FROM user')
     users_data = users_cursor.fetchall()
     for x in users_data:
         if par in x and param in x:
+            print("ayto einai to id:" + str(x[0]))
             return x[0]
-    return 0
-
+    return False

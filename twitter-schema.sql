@@ -33,4 +33,4 @@ INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (11, "iva
 INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Hello World!");
 INSERT INTO "tweet" ("user_id", "content") VALUES (10, "This is so awesome");
 INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Testing twitter clone");
-SELECT * FROM tweet;
+--SELECT * FROM tweet;
