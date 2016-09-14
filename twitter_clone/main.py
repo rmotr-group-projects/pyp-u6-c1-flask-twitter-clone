@@ -40,32 +40,43 @@ def login():
         
         # Pull query to grab usernames and password from db
         cursor = g.db.execute("""
-            SELECT username, password
+            SELECT username,  password, id
             FROM user;
             """)
         
-        # Put usernames and passwords into dictionary
+        # Put usernames and passwords into dictionary of tuples
         users = {}
         for row in cursor.fetchall():
-            users[row[0]] = row[1]
+            # print(row)
+            users[row[0]] = (row[1], row[2])
+            
         username = request.form['username']
+        # For clarity but may result in errors if username not in users
+        # password = users[username][0]
+        # user_id = users[username][1]
         
+        # print("username = {}".format(username))
+        # print("password = {}".format(password))
+        # print("user_id = {}".format(user_id))
+
         # Check validity of username and password, if valid, redirect to feed
         if username not in users:
-            error = 'Invalid username'
-        elif request.form['password'] != users[username]:
-            error = 'Invalid password'
+            error = 'Invalid username or password' # Changed to pass test (JLZ) 
+            # error = 'Invalid username'
+        elif request.form['password'] != users[username][0]:
+            error = 'Invalid username or password' # Changed to pass test (JLZ)
         else:
             session['logged_in'] = True
+            session['username'] = username
+            session['user_id'] = users[username][1]
+            # flash('You were logged in')
             return redirect(url_for('own_feed', method='GET', username=username))
     return render_template('static_templates/login.html', error=error)
 
-# # @app.route('/own_feed/<username>')
-# def show_user_profile(username):
-#     # show the user profile for that user
-#     return 'User %s' % username
+
 @app.route('/<username>', methods=['GET', 'POST'])
-def own_feed (username):
+@login_required
+def own_feed(username):
     if request.method == 'GET':
         
         cursor = g.db.execute("""
@@ -83,4 +94,12 @@ def own_feed (username):
 
         return render_template('static_templates/own_feed.html', username=username, data=tweets)
 
-        
+@app.route('/logout')
+@login_required
+def logout():
+    # session.pop('logged_in', None)
+    # flash('You were logged out')
+    session['logged_in'] = False
+    session['user_id'] = None
+    session['username'] = None
+    return redirect(url_for('login'))
