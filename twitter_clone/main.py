@@ -13,15 +13,15 @@ def connect_db(db_name):
 
 
 def validate(username, password):
-    con = connect_db(app.config['DATABASE'][1])
+    con = g.db
     validation = False
     with con:
         cur = con.cursor()
         cur.execute("SELECT * FROM user")
         rows = cur.fetchall()
         for row in rows:
-            user = row[1] 
-            passw = row[2] 
+            user = row[1]
+            passw = row[2]
             if user == username:
                 validation = check_password(passw, password)
     return validation
@@ -48,7 +48,8 @@ def login_required(f):
 @app.route('/')
 @login_required
 def homepage():
-    return render_template('own_feed.html')
+    return redirect(url_for('own_feed'))
+
 
 
 @app.route('/login', methods = ['GET', 'POST'])
@@ -60,16 +61,25 @@ def login():
         validation = validate(username, password)
         if validation == False:
             error = ' - Login Failed'
-        else:                                   
-            session['username'] = True
+        else:
+            session['username'] = username
             return redirect(url_for('own_feed'))
     return render_template('/static_templates/login.html', error = error)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('login'))
 
 
 @app.route('/own_feed', methods = ['GET', 'POST'])
 @login_required
 def own_feed():
-    return render_template('/static_templates/own_feed.html')
+    cursor = g.db.execute('SELECT t.id, t.user_id, t.created, t.content, u.username FROM tweet t INNER JOIN user u ON t.user_id = u.id WHERE u.username = "{0}";'.format(session['username']))
+    tweets = [dict(id = row[0], user_id = row[1], created = row[2], content = row[3]) for row in cursor.fetchall()]
+    return render_template('/static_templates/own_feed.html', tweets = tweets)
+
 
 @app.route('/profile', methods = ['GET'])
 @login_required
