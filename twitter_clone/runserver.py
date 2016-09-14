@@ -10,6 +10,6 @@ if __name__ == '__main__':
     app.config['SECRET_KEY'] = "kljasdno9asud89uy981uoaisjdoiajsdm89uas980d"
     app.config['DATABASE'] = (0, settings.DATABASE_NAME)
 
-    host = os.environ.get('IP', '0.0.0.0')
-    port = int(os.environ.get('PORT', 8080))
+    host = os.environ.get('IP', '127.0.0.1')
+    port = int(os.environ.get('PORT', 5000))
     app.run(host=host, port=port)
