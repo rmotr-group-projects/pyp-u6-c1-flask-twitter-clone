@@ -4,8 +4,48 @@ from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
                    flash, url_for)
+import os
+
 
 app = Flask(__name__)
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session:################################session
+            return redirect(url_for('login', next=request.url), code=302)
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+# implement your views here
+@app.route('/')
+@login_required
+def homepage():
+    return render_template('own_feed.html')
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    error = None
+    if request.method == 'POST':
+        x = valid_login(request.form['username'], request.form['password'])
+        if x:
+            #log_the_user_in(request.form['username'])
+            session['username'] = request.form['username']
+            session['user_id'] = x
+            return redirect('homepage', code=302)
+        else:
+            error = 'Invalid username or password'
+            flash(error, category='message')
+            return redirect(url_for('login'), code=302, )
+    # the code below is executed if the request method  was GET or the credentials were invalid
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session['username'] = None
+    session['user_id'] = None
+    return redirect(url_for('homepage'))
 
 
 def connect_db(db_name):
@@ -16,14 +56,19 @@ def connect_db(db_name):
 def before_request():
     g.db = connect_db(app.config['DATABASE'][1])
 
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'username' not in session:
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-    return decorated_function
+@app.teardown_request
+def teardown_request(exception):
+    db = getattr(g, 'db', None)
+    if db is not None:
+        db.close()
 
 
-# implement your views here
+def valid_login(par , param):
+    #curs = g.db.cursor()
+    users_cursor = g.db.execute('SELECT * FROM user')
+    users_data = users_cursor.fetchall()
+    for x in users_data:
+        if par in x and param in x:
+            return x[0]
+    return 0
+

@@ -45,7 +45,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('<form', response.data)
 
-    def test_not_authenticated_index_redirects_login(self):
+    def test_not_authenticated_index_redirects_login(self):##
         response = self.client.get('/')
         self.assertEqual(response.status_code, 302)
         self.assertIn('http://localhost/login', response.location)
@@ -54,17 +54,17 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
         self.assertIn('<form', response.data)
         self.assertEqual(response.status_code, 200)
 
-    def test_authenticated_login_redirects_next(self):
+    def test_authenticated_login_redirects_next(self):###############################edo
         with app.test_client() as client:
             client.post('/login',
                         data={'username': 'testuser1',
                               'password': '1234'},
                         follow_redirects=True)
             response = client.get('/login')
-            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.status_code, 302)########
             self.assertEqual(response.location, 'http://localhost/')
 
-    def test_login_user_does_not_exist(self):
+    def test_login_user_does_not_exist(self):###
         response = self.client.post(
             '/login',
             data={'username': 'donotexist',
@@ -72,7 +72,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Invalid username or password', response.data)
 
-    def test_login_correct(self):
+    def test_login_correct(self):##################
         with app.test_client() as client:
             response = client.post(
                 '/login',
@@ -82,7 +82,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
             self.assertEqual(session['user_id'], 1)
             self.assertEqual(session['username'], 'testuser1')
 
-    def test_logout(self):
+    def test_logout(self):#####
         with app.test_client() as client:
             response = client.post(
                 '/login',
