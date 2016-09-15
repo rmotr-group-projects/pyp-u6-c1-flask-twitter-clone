@@ -36,6 +36,7 @@
 
 <div class="row">
     <div class="col-md-12">
+        {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
         <form role="form" action="" method="POST">
 		  <div class="form-group">
 		    <label for="username">Username</label>
