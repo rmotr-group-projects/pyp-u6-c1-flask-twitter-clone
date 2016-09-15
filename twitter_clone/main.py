@@ -30,7 +30,8 @@ def homepage():
 def login():
     error = None
     if request.method == 'POST':
-        x = valid_login(request.form['username'], "{}".format(md5(request.form['password']).hexdigest()))
+        x = valid_login(request.form['username'], "{}".format(md5((request.form['password']).\
+                                                                  encode('utf-8')).hexdigest()))
         if x:
             #log_the_user_in(request.form['username'])
             session['username'] = request.form['username']
