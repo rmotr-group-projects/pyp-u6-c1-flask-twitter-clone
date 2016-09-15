@@ -138,6 +138,8 @@ def own_feed(username):
 
     #request.method == 'POST'
     else:
+        if 'username' not in session:
+            return render_template('static_templates/login.html'), 403
         new_tweet_body = request.form['tweet']
         sql_statement = 'INSERT INTO "tweet" ("user_id", "content") VALUES (?, ?);'
 
