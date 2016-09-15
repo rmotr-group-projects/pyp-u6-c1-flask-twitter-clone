@@ -3,8 +3,7 @@ from hashlib import md5
 from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
-                   flash, url_for)
-import os
+                   flash, url_for, abort)
 
 
 app = Flask(__name__)
@@ -52,25 +51,31 @@ def logout():
 #tweet views here
 @app.route('/<username>', methods=['GET', 'POST'])
 def user_feeds(username):
-    right_user = False
-    if session:
-        if session['username'] == username:
-            right_user = True
     id = convert_username_to_id(username)
     if request.method == 'POST':
-        if username!=session['username']:
+        if not session:
+            abort(403)
+        if username != session['username']:
             abort(403)
         new_tweet = str(request.form['tweet'])
-        g.db.execute('INSERT INTO tweet ("user_id", "content") \
-        VALUES ({}, {})'.format(id, new_tweet))
+        string='INSERT INTO tweet (user_id, content) VALUES ("%s", "%s");'%(id, new_tweet)
+        g.db.execute(string)
     tweets = get_tweets(id)
-    return render_template('own_feed.html', right_user=right_user, username=username, tweets=tweets)
+    if session:
+        if session['username'] == username:
+            return render_template('own_feed.html', username=username, tweets=tweets)
+        else:
+            return render_template('other_feed.html', username=username, tweets=tweets)
+    else:
+        return render_template('other_feed.html', username=username, tweets=tweets)
+
 
 def convert_username_to_id(username):
     users_cursor = g.db.execute('SELECT * FROM user')
     users_data = users_cursor.fetchall()
     for x in users_data:
-        if username in x:
+        if username in str(x):
+            #print('to tou username einai: ', x[0])
             return x[0]
 
 def get_tweets(id):
@@ -78,8 +83,9 @@ def get_tweets(id):
     tweets_data = tweets_cursor.fetchall()
     tweets_list=[]
     for x in tweets_data:
-        if id in x:
+        if id == x[1]:
             tweets_list.append(x)
+    #print('h lista me ta tweets ', tweets_list)
     return tweets_list
 
 
