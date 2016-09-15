@@ -121,9 +121,9 @@ class FeedTestCase(BaseTwitterCloneTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertTrue(b'<form' in response.data)
             self.assertEqual(response.data.count(b'<form'), 3)  # textarea and 2 tweet delete buttons
-            self.assertTrue('Tweet 1 testuser1' in response.data)
-            self.assertTrue('Tweet 2 testuser1' in response.data)
-            self.assertFalse('Tweet 1 testuser2' in response.data)
+            self.assertTrue(b'Tweet 1 testuser1' in response.data)
+            self.assertTrue(b'Tweet 2 testuser1' in response.data)
+            self.assertFalse(b'Tweet 1 testuser2' in response.data)
 
     def test_feed_authenticated_get_other_users_feed(self):
         with app.test_client() as client:
@@ -149,7 +149,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
             cursor = self.db.execute("select * from tweet where user_id = 1;")
             self.assertEqual(len(cursor.fetchall()), 2)############stuck   OK
             self.assertTrue(b'<form' in response.data)
-            self.assertEqual(response.data.count('<form'), 4)  # textarea and 3 tweet delete buttons
+            self.assertEqual(response.data.count(b'<form'), 4)  # textarea and 3 tweet delete buttons
             self.assertTrue(b'Tweet 1 testuser1' in response.data)
             self.assertTrue(b'Tweet 2 testuser1' in response.data)
             self.assertTrue(b'This tweet is new' in response.data)
