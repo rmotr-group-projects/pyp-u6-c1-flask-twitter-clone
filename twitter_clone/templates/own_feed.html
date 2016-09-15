@@ -27,7 +27,7 @@
       <ul class="nav navbar-nav navbar-right">
 
             <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> martinzugnoni</a></li>
-            <li><a href="/logout?next=%2Fivanzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+            <li><a href="/logout?next=%2Fmartinzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
 
       </ul>
     </div>
@@ -35,64 +35,48 @@
 </nav>
 
 
+
 <div class="row">
     <div class="col-sm-2"></div>
     <div class="col-sm-8">
 
+        <!--here is the TEXTAREA!!!!!-->
+        <div class="row">
+            <form role="form" action="" method="POST">
+    		  <div class="form-group">
+                <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
+    		  </div>
+    		  <button type="submit" class="btn btn-info pull-right">Submit</button>
+    		</form>
+        </div>
+
+
+<!--TWEETS HERE!!!!!!!!!!!!-->
+        {% if tweets %}
+        {% for tweet in tweets %}
 
         <div class="row">
 
-
             <div class="well well-large">
+
+                <form action="/tweets/{{ tweet[0] }}/delete?next=http://localhost:8080/{{username}}" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
 
 
                 <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:42:45</span>
+                    <strong>@{{username}}</strong>
+                    <span class="label label-primary">{{ tweet[2] }}</span>
                 </div>
-                <div>sdfasdf</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:41:44</span>
-                </div>
-                <div>sdfasdfadsf</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:36</span>
-                </div>
-                <div>dfgfdgdfg</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:20</span>
-                </div>
-                <div>kjasdhjaskdh</div>
+                <div>{{ tweet[3] }}</div>
 
 
             </div>
 
 
         </div>
+        {% endfor %}
+        {% endif %}
     </div>
     <div class="col-sm-2"></div>
 </div>

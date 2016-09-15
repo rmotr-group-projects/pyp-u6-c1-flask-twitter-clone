@@ -1,8 +1,10 @@
 
 import os
 
-from twitter_clone.main import app
-from twitter_clone import settings
+#from twitter_clone.main \
+from main import app
+#from twitter_clone
+import settings
 
 
 if __name__ == '__main__':
@@ -12,4 +14,4 @@ if __name__ == '__main__':
 
     host = os.environ.get('IP', '0.0.0.0')
     port = int(os.environ.get('PORT', 8080))
-    app.run(host=host, port=port)
+    app.run()#host=host), port=port)
