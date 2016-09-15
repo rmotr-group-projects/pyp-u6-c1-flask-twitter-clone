@@ -107,7 +107,7 @@ def _get_tweets_from_db(username):
 def delete_tweet(tweet_id):
     g.db.execute('DELETE FROM tweet WHERE id = {}'.format(tweet_id))
     g.db.commit()
-    return redirect(url_for('own_feed'))
+    return redirect(url_for('own_feed', username = session['username']))
 
 
 @app.route('/profile', methods = ['GET'])
