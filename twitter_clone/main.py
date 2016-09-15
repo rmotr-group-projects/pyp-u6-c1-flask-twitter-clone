@@ -63,10 +63,13 @@ def user_feeds(username):
     tweets = get_tweets(id)
     if session:
         if session['username'] == username:
+            print(1, tweets)
             return render_template('own_feed.html', username=username, tweets=tweets)
         else:
+            print(2, tweets)
             return render_template('other_feed.html', username=username, tweets=tweets)
     else:
+        print(3, tweets)
         return render_template('other_feed.html', username=username, tweets=tweets)
 
 
@@ -75,7 +78,6 @@ def convert_username_to_id(username):
     users_data = users_cursor.fetchall()
     for x in users_data:
         if username in str(x):
-            #print('to tou username einai: ', x[0])
             return x[0]
 
 def get_tweets(id):
@@ -85,7 +87,6 @@ def get_tweets(id):
     for x in tweets_data:
         if id == x[1]:
             tweets_list.append(x)
-    #print('h lista me ta tweets ', tweets_list)
     return tweets_list
 
 

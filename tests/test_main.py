@@ -136,7 +136,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):####################
             self.assertFalse('Tweet 1 testuser1' in response.data)
             self.assertFalse('Tweet 2 testuser1' in response.data)
 
-    def test_feed_authenticated_post(self):##########
+    def test_feed_authenticated_post(self):######################################
         with app.test_client() as client:
             client.post(
                 '/login',
