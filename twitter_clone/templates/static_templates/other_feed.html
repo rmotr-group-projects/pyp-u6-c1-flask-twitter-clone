@@ -25,10 +25,12 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
-
-            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> martinzugnoni</a></li>
-            <li><a href="/logout?next=%2Fivanzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
-
+            {% if session['username'] %}:
+                <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> {{session['username']}}</a></li>
+                <li><a href="/logout?next=%2F{{username}}"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+            {% else %}
+                <li><a href="/login"><i class="fa fa-sign-out" aria-hidden="true"></i> Log in</a></li>
+            {% endif %}
       </ul>
     </div>
   </div>
@@ -42,55 +44,19 @@
 
         <div class="row">
 
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:42:45</span>
+            {% for row in data %}:
+                <div class="well well-large">
+    
+    
+                    <div>
+                        <strong>@{{row[1]}}</strong>
+                        <span class="label label-primary">{{row[4]}}</span>
+                    </div>
+                    <div>{{row[3]}}</div>
+    
+    
                 </div>
-                <div>sdfasdf</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:41:44</span>
-                </div>
-                <div>sdfasdfadsf</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:36</span>
-                </div>
-                <div>dfgfdgdfg</div>
-
-
-            </div>
-
-            <div class="well well-large">
-
-
-                <div>
-                    <strong>@ivanzugnoni</strong>
-                    <span class="label label-primary">2016-06-07 01:39:20</span>
-                </div>
-                <div>kjasdhjaskdh</div>
-
-
-            </div>
-
+            {% endfor %}
 
         </div>
     </div>
