@@ -1,4 +1,4 @@
--- sqlite3 database.db < twitter-schema.sql
+-- sqlite3 twitter.db < twitter-schema.sql
 
 PRAGMA foreign_keys = ON;
 
