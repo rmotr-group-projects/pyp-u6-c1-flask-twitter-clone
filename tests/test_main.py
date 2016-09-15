@@ -72,7 +72,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
             data={'username': 'donotexist',
                   'password': md5(pws).hexdigest()})
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Invalid username or password', response.data)
+        self.assertIn(b'Invalid username or password', response.data)
 
     def test_login_correct(self):
         with app.test_client() as client:
@@ -107,9 +107,9 @@ class FeedTestCase(BaseTwitterCloneTestCase):
         response = self.client.get('/testuser1')
         self.assertEqual(response.status_code, 200)
         self.assertFalse(b'<form' in response.data)
-        self.assertTrue('Tweet 1 testuser1' in response.data)
-        self.assertTrue('Tweet 2 testuser1' in response.data)
-        self.assertFalse('Tweet 1 testuser2' in response.data)
+        self.assertTrue(b'Tweet 1 testuser1' in response.data)
+        self.assertTrue(b'Tweet 2 testuser1' in response.data)
+        self.assertFalse(b'Tweet 1 testuser2' in response.data)
 
     def test_feed_authenticated_get(self):
         with app.test_client() as client:
@@ -120,7 +120,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
             response = client.get('/testuser1')
             self.assertEqual(response.status_code, 200)
             self.assertTrue(b'<form' in response.data)
-            self.assertEqual(response.data.count('<form'), 3)  # textarea and 2 tweet delete buttons
+            self.assertEqual(response.data.count(b'<form'), 3)  # textarea and 2 tweet delete buttons
             self.assertTrue('Tweet 1 testuser1' in response.data)
             self.assertTrue('Tweet 2 testuser1' in response.data)
             self.assertFalse('Tweet 1 testuser2' in response.data)
@@ -134,9 +134,9 @@ class FeedTestCase(BaseTwitterCloneTestCase):
             response = client.get('/testuser2')  # different as logged in
             self.assertEqual(response.status_code, 200)
             self.assertFalse(b'<form' in response.data)
-            self.assertTrue('Tweet 1 testuser2' in response.data)
-            self.assertFalse('Tweet 1 testuser1' in response.data)
-            self.assertFalse('Tweet 2 testuser1' in response.data)
+            self.assertTrue(b'Tweet 1 testuser2' in response.data)
+            self.assertFalse(b'Tweet 1 testuser1' in response.data)
+            self.assertFalse(b'Tweet 2 testuser1' in response.data)
 
     def test_feed_authenticated_post(self):
         with app.test_client() as client:
@@ -150,10 +150,10 @@ class FeedTestCase(BaseTwitterCloneTestCase):
             self.assertEqual(len(cursor.fetchall()), 2)############stuck   OK
             self.assertTrue(b'<form' in response.data)
             self.assertEqual(response.data.count('<form'), 4)  # textarea and 3 tweet delete buttons
-            self.assertTrue('Tweet 1 testuser1' in response.data)
-            self.assertTrue('Tweet 2 testuser1' in response.data)
-            self.assertTrue('This tweet is new' in response.data)
-            self.assertFalse('Tweet 1 testuser2' in response.data)
+            self.assertTrue(b'Tweet 1 testuser1' in response.data)
+            self.assertTrue(b'Tweet 2 testuser1' in response.data)
+            self.assertTrue(b'This tweet is new' in response.data)
+            self.assertFalse(b'Tweet 1 testuser2' in response.data)
 
     def test_feed_not_authenticated_post(self):
         response = self.client.post('/testuser1', data={'tweet': 'This tweet is new'})
@@ -176,7 +176,7 @@ class ProfileTestCase(BaseTwitterCloneTestCase):
             response = client.get('/profile')
             self.assertEqual(response.status_code, 200)
             self.assertIn(b'<form', response.data)
-            self.assertIn('testuser1', response.data)
+            self.assertIn(b'testuser1', response.data)
 
     def test_profile_authenticated_post(self):######AYTO MENEI!!!!!!!!!!!!!!!!
         with app.test_client() as client:
