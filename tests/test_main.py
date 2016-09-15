@@ -29,9 +29,10 @@ class BaseTwitterCloneTestCase(unittest.TestCase):
             sql_query = f.read()
         for statement in sql_query.split(';'):
             self.db.execute(statement)
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (1, "testuser1", "{}");'.format(md5('1234').hexdigest()))
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (2, "testuser2", "{}");'.format(md5('1234').hexdigest()))
-        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (3, "testuser3", "{}");'.format(md5('1234').hexdigest()))
+            passwordss='1234'.encode('utf-8')
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (1, "testuser1", "{}");'.format(md5(passwordss).hexdigest()))
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (2, "testuser2", "{}");'.format(md5(passwordss).hexdigest()))
+        self.db.execute('INSERT INTO "user" ("id", "username", "password") VALUES (3, "testuser3", "{}");'.format(md5(passwordss).hexdigest()))
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (1, "Tweet 1 testuser1");')
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (1, "Tweet 2 testuser1");')
         self.db.execute('INSERT INTO "tweet" ("user_id", "content") VALUES (2, "Tweet 1 testuser2");')
