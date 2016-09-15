@@ -69,7 +69,7 @@ def login():
         if username not in users:
             error = 'Invalid username or password' # Changed to pass test (JLZ)
             # error = 'Invalid username'
-        elif md5(request.form['password']).hexdigest() != users[username][0]:
+        elif md5(request.form['password'].encode('utf-8')).hexdigest() != users[username][0]:
             error = 'Invalid username or password' # Changed to pass test (JLZ)
         else:
             session['logged_in'] = True
