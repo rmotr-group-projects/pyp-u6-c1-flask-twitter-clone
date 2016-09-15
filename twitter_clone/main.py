@@ -58,9 +58,9 @@ def user_feeds(username):
         if username != session['username']:
             abort(403)
         new_tweet = str(request.form['tweet'])
-        print('this is the new tweet,', new_tweet)
+        #print('this is the new tweet,', new_tweet)
         string='INSERT INTO tweet ("user_id", "content") VALUES (%s, "%s");'%(id, new_tweet)
-        print('this is the string', string)
+        #print('this is the string', string)
         g.db.execute(string)
     tweets = get_tweets(id)
     if session:
@@ -73,6 +73,39 @@ def user_feeds(username):
     else:
         print(3, tweets)
         return render_template('other_feed.html', username=username, tweets=tweets)
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        username = str(request.form['username'])
+        first_name = str(request.form['first_name'])
+        last_name = str(request.form['last_name'])
+        birth_date = str(request.form['birth_date'])
+        a_string = 'UPDATE user  SET username="%s" , first_name="%s", last_name="%s",\
+         birth_date="%s" where id=%s;'%(username, first_name, last_name, birth_date, session['user_id'])
+        print (a_string)
+        g.db.execute(a_string)
+    string = 'SELECT * FROM user where id = %s' % session['user_id']
+    curs = g.db.execute(string).fetchall()
+    print(curs)
+    return render_template('profile.html', username=curs[0][1], firstname=curs[0][3],\
+            lastname=curs[0][4], birthdate=curs[0][5])
+
+@app.route('/tweets/<int:id>/delete', methods=['GET', 'POST'])
+@login_required
+def delete(id):
+    print('this is the id of tweet:', id)
+    cursor = g.db.execute("select * from tweet;")
+    print(cursor.fetchall())
+
+    string = 'DELETE FROM tweet WHERE id=%s' % id
+    g.db.execute(string)
+
+    cursor = g.db.execute("select * from tweet;")
+    print(cursor.fetchall())
+
+    return redirect(url_for('homepage'))
 
 
 def convert_username_to_id(username):
