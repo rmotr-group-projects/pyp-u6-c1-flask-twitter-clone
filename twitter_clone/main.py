@@ -53,12 +53,14 @@ def logout():
 def user_feeds(username):
     id = convert_username_to_id(username)
     if request.method == 'POST':
-        if not session:
+        if 'username'not in session:
             abort(403)
         if username != session['username']:
             abort(403)
         new_tweet = str(request.form['tweet'])
-        string='INSERT INTO tweet (user_id, content) VALUES ("%s", "%s");'%(id, new_tweet)
+        print('this is the new tweet,', new_tweet)
+        string='INSERT INTO tweet ("user_id", "content") VALUES (%s, "%s");'%(id, new_tweet)
+        print('this is the string', string)
         g.db.execute(string)
     tweets = get_tweets(id)
     if session:

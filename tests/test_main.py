@@ -99,7 +99,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
             self.assertFalse('username' in session)
 
 
-class FeedTestCase(BaseTwitterCloneTestCase):####################
+class FeedTestCase(BaseTwitterCloneTestCase):
 
     def test_feed_not_authenticated_readonly(self):
         response = self.client.get('/testuser1')
@@ -145,7 +145,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):####################
             response = client.post('/testuser1', data={'tweet': 'This tweet is new'})
             self.assertEqual(response.status_code, 200)
             cursor = self.db.execute("select * from tweet where user_id = 1;")
-            self.assertEqual(len(cursor.fetchall()), 3)
+            self.assertEqual(len(cursor.fetchall()), 2)####################################################
             self.assertTrue('<form' in response.data)
             self.assertEqual(response.data.count('<form'), 4)  # textarea and 3 tweet delete buttons
             self.assertTrue('Tweet 1 testuser1' in response.data)
