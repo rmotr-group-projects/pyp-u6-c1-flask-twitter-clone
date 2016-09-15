@@ -44,7 +44,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
     def test_login_get(self):
         response = self.client.get('/login')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('<form', response.data)
+        self.assertIn(b'<form', response.data)
 
     def test_not_authenticated_index_redirects_login(self):
         response = self.client.get('/')
@@ -52,7 +52,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
         self.assertIn('http://localhost/login', response.location)
 
         response = self.client.get('/', follow_redirects=True)
-        self.assertIn('<form', response.data)
+        self.assertIn(b'<form', response.data)
         self.assertEqual(response.status_code, 200)
 
     def test_authenticated_login_redirects_next(self):
@@ -66,10 +66,11 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
             self.assertEqual(response.location, 'http://localhost/')
 
     def test_login_user_does_not_exist(self):
+        pws = 'donotexist'.encode('utf-8')
         response = self.client.post(
             '/login',
             data={'username': 'donotexist',
-                  'password': md5('donotexist').hexdigest()})
+                  'password': md5(pws).hexdigest()})
         self.assertEqual(response.status_code, 200)
         self.assertIn('Invalid username or password', response.data)
 
@@ -105,7 +106,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
     def test_feed_not_authenticated_readonly(self):
         response = self.client.get('/testuser1')
         self.assertEqual(response.status_code, 200)
-        self.assertFalse('<form' in response.data)
+        self.assertFalse(b'<form' in response.data)
         self.assertTrue('Tweet 1 testuser1' in response.data)
         self.assertTrue('Tweet 2 testuser1' in response.data)
         self.assertFalse('Tweet 1 testuser2' in response.data)
@@ -118,7 +119,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
                 follow_redirects=True)
             response = client.get('/testuser1')
             self.assertEqual(response.status_code, 200)
-            self.assertTrue('<form' in response.data)
+            self.assertTrue(b'<form' in response.data)
             self.assertEqual(response.data.count('<form'), 3)  # textarea and 2 tweet delete buttons
             self.assertTrue('Tweet 1 testuser1' in response.data)
             self.assertTrue('Tweet 2 testuser1' in response.data)
@@ -132,7 +133,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
                 follow_redirects=True)
             response = client.get('/testuser2')  # different as logged in
             self.assertEqual(response.status_code, 200)
-            self.assertFalse('<form' in response.data)
+            self.assertFalse(b'<form' in response.data)
             self.assertTrue('Tweet 1 testuser2' in response.data)
             self.assertFalse('Tweet 1 testuser1' in response.data)
             self.assertFalse('Tweet 2 testuser1' in response.data)
@@ -147,7 +148,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
             self.assertEqual(response.status_code, 200)
             cursor = self.db.execute("select * from tweet where user_id = 1;")
             self.assertEqual(len(cursor.fetchall()), 2)############stuck   OK
-            self.assertTrue('<form' in response.data)
+            self.assertTrue(b'<form' in response.data)
             self.assertEqual(response.data.count('<form'), 4)  # textarea and 3 tweet delete buttons
             self.assertTrue('Tweet 1 testuser1' in response.data)
             self.assertTrue('Tweet 2 testuser1' in response.data)
@@ -174,7 +175,7 @@ class ProfileTestCase(BaseTwitterCloneTestCase):
                 follow_redirects=True)
             response = client.get('/profile')
             self.assertEqual(response.status_code, 200)
-            self.assertIn('<form', response.data)
+            self.assertIn(b'<form', response.data)
             self.assertIn('testuser1', response.data)
 
     def test_profile_authenticated_post(self):######AYTO MENEI!!!!!!!!!!!!!!!!
