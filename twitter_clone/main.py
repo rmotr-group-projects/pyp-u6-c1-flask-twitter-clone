@@ -8,10 +8,11 @@ from flask import (g, request, session, redirect, render_template,
 
 app = Flask(__name__)
 
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'username' not in session:################################session
+        if 'username' not in session:
             return redirect(url_for('login', next=request.url), code=302)
         return f(*args, **kwargs)
     return decorated_function
@@ -23,6 +24,7 @@ def login_required(f):
 @login_required
 def homepage():
     return render_template('own_feed.html')
+
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
@@ -42,6 +44,7 @@ def login():
     # the code below is executed if the request method  was GET or the credentials were invalid
     return render_template('login.html', error=error)
 
+
 @app.route('/logout')
 def logout():
     session.pop("username", None)
@@ -59,8 +62,7 @@ def user_feeds(username):
             abort(403)
         new_tweet = str(request.form['tweet'])
         #print('this is the new tweet,', new_tweet)
-        string='INSERT INTO tweet ("user_id", "content") VALUES (%s, "%s");'%(id, new_tweet)
-        #print('this is the string', string)
+        string ='INSERT INTO tweet ("user_id", "content") VALUES (%s, "%s");' % (id, new_tweet)
         g.db.execute(string)
     tweets = get_tweets(id)
     if session:
@@ -74,6 +76,7 @@ def user_feeds(username):
         print(3, tweets)
         return render_template('other_feed.html', username=username, tweets=tweets)
 
+#profile view
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -92,6 +95,7 @@ def profile():
     return render_template('profile.html', username=curs[0][1], firstname=curs[0][3],\
             lastname=curs[0][4], birthdate=curs[0][5])
 
+#tweets del not view
 @app.route('/tweets/<int:id>/delete', methods=['GET', 'POST'])
 @login_required
 def delete(id):
@@ -107,7 +111,7 @@ def delete(id):
 
     return redirect(url_for('homepage'))
 
-
+#functions needed for operations
 def convert_username_to_id(username):
     users_cursor = g.db.execute('SELECT * FROM user')
     users_data = users_cursor.fetchall()
@@ -134,6 +138,7 @@ def connect_db(db_name):
 def before_request():
     g.db = connect_db(app.config['DATABASE'][1])
 
+
 @app.teardown_request
 def teardown_request(exception):
     db = getattr(g, 'db', None)
@@ -142,7 +147,6 @@ def teardown_request(exception):
 
 
 def valid_login(par, param):
-    #curs = g.db.cursor()
     users_cursor = g.db.execute('SELECT * FROM user')
     users_data = users_cursor.fetchall()
     for x in users_data:
