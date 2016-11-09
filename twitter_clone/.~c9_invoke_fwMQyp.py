@@ -31,7 +31,7 @@ def login_required(f):
 def login():
     error = None
     cursor = g.db.execute('SELECT username, password FROM user;')
-    users_pw = [dict(username=row[0], password=row[1]) for row in cursor.fetchall()]
+    users_pw = dict(cursor.fetchall())
     
     if request.method == 'POST': # someone's trying to log in
         username = request.form['username']
@@ -41,6 +41,8 @@ def login():
         if valid_credentials(username, hashed_pw):
             session['user_id'] = 1 # hardcode for now it should be the user ID from the db
             session['username'] = username
+            
+            if users_pw['username'] == hashed_pw
             
             return redirect(url_for('index'))
         else:
