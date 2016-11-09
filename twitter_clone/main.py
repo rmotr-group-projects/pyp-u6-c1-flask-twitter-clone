@@ -36,18 +36,15 @@ def login():
     users_id = dict(cursor_id.fetchall())
 
     if request.method == 'POST': # someone's trying to log in
-
         username = request.form['username']
         password = request.form['password']
         hashed_pw = md5(request.form['password'].encode('utf-8')).hexdigest()
-
         if username in users_pw:
             if users_pw[username] == hashed_pw:
                 session['user_id'] =  users_id[username]
                 session['username'] = username
                 return redirect('/')
                 # same as `return redirect(url_for('index'))` but now if we method name for route '/' it is okay
-
         else:
             error = "Invalid username or password"
     elif request.method == 'GET':
@@ -81,27 +78,22 @@ def profile():
         birth_date = request.form['birth_date']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
-        raw_sql = '''
+        update_user_sql = '''
             UPDATE user
             SET birth_date = '{}', first_name = '{}', last_name = '{}'
             WHERE username = '{}'
         '''.format(birth_date, first_name, last_name, session['username'])
 
-        g.db.execute(raw_sql)
+        g.db.execute(update_user_sql)
         g.db.commit()
 
     return render_template('profile.html', username = username)
 
-# for passing parameters `<int:` makes sure the param is an integer
-# @app.route('/page/<page_id>')
-# def page(page_id):
-#     pageid = page_id
 
+# `<int:` makes sure the param is an integer
 @app.route('/tweets/<int:tweet_id>/delete', methods=['POST'])
 @login_required
 def delete(tweet_id):
-    # import ipdb; ipdb.set_trace()
-    # find the tweet
     # test doesn't check for this but need to make sure a logged in user cannot delete someone else's tweet
     find_tweet_sql = 'SELECT * FROM tweet WHERE id={}'.format(tweet_id)
     tweet = g.db.execute(find_tweet_sql).fetchone()
@@ -121,12 +113,7 @@ def view_feed(username):
     user_id = user[0]
 
     if request.method == 'GET': # viewer wants to view a feed
-        get_tweets_sql = '''
-            SELECT *
-            FROM tweet
-            WHERE tweet.user_id = '{}'
-        '''.format(user_id)
-
+        get_tweets_sql = "SELECT * FROM tweet WHERE user_id = '{}'".format(user_id)
         tweets = g.db.execute(get_tweets_sql).fetchall()
 
         if 'username' in session: # viewer is logged in
