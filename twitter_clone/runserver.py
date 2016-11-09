@@ -4,7 +4,6 @@ import os
 from twitter_clone.main import app
 from twitter_clone import settings
 
-
 if __name__ == '__main__':
     app.debug = True
     app.config['SECRET_KEY'] = "kljasdno9asud89uy981uoaisjdoiajsdm89uas980d"
