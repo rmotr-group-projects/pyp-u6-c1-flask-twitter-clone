@@ -27,16 +27,41 @@ def login_required(f):
 
 
 # implement your views here
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    error = None
+    cursor = g.db.execute('SELECT username, password FROM user;')
+    if request.method == 'POST': # someone's trying to log in
+        username = request.form['username']
+        password = request.form['password']
+        hashed_pw = md5(request.form['password'].encode('utf-8')).hexdigest()
+        
+        if valid_credentials(username, hashed_pw):
+            session['user_id'] = 1 # hardcode for now it should be the user ID from the db
+            session['username'] = username
+            
+            return redirect(url_for('index'))
+        else:
+            error = "Invalid username or password"
+
+    return render_template('login.html', error=error)
     
 @app.route('/')
 @login_required
 def index():
-    #if not authenticated:
-    #redirect to login
     return redirect(url_for('login'))
-        
-    #if authenticated:
-        #return index
+    
+@app.route('/logout')
+def logout():
+    # second parameter means that nothing will happen if the key doesn't exist
+    session.pop('user_id', None)
+    session.pop('username', None) 
+
+    return redirect(url_for('index'))
+    
+def valid_credentials(username, hashed_pw):
+    if username == 'testuser1' : # hardcoded for now. implement sql checking
+        # should return the user's ID somehow for session
+        return True
+    else:
+        return False
