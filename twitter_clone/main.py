@@ -71,10 +71,7 @@ def logout():
 @login_required
 def profile():
     username = session['username']
-    if request.method == 'GET':
-        # get all the tweets
-        pass
-    elif request.method == 'POST':
+    if request.method == 'POST':
         birth_date = request.form['birth_date']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
@@ -87,7 +84,7 @@ def profile():
         g.db.execute(update_user_sql)
         g.db.commit()
 
-    return render_template('profile.html', username = username)
+    return render_template('profile.html', username=username)
 
 
 # `<int:` makes sure the param is an integer
@@ -109,25 +106,29 @@ def delete(tweet_id):
 def view_feed(username):
     tweets = None
     get_user_sql = "SELECT * FROM user WHERE username='{}'".format(username)
+
+    # sample user variable: (1, u'testuser1', u'81dc9bdb52d04dc20036dbd8313ed055', None, None, None)
     user = g.db.execute(get_user_sql).fetchone()
     user_id = user[0]
+    get_tweets_sql = "SELECT * FROM tweet WHERE user_id = '{}'".format(user_id)
 
     if request.method == 'GET': # viewer wants to view a feed
-        get_tweets_sql = "SELECT * FROM tweet WHERE user_id = '{}'".format(user_id)
+        # tweets is an array of tweet tuples. eg: [(1, 1, u'2016-11-09 13:07:31', u'Tweet 1 testuser1'), (2, 1, u'2016-11-09 13:07:31', u'Tweet 2 testuser1')]
         tweets = g.db.execute(get_tweets_sql).fetchall()
-
         if 'username' in session: # viewer is logged in
             if session['username'] == username: # viewer is viewing their own feed
-                return render_template('own_feed.html', session=session, tweets=tweets)
+                return render_template('own_feed.html', session=session, user=user, tweets=tweets)
             else: # you are viewing someone else's feed
-                return render_template('other_feed.html', session=session, tweets=tweets)
+                return render_template('other_feed.html', session=session, user=user, tweets=tweets)
         else:
+            # import ipdb; ipdb.set_trace()
             return render_template('other_feed.html', session=session, tweets=tweets)
     elif request.method == 'POST':
         if 'username' in session and session['username'] == username:
             insert_tweet_sql = "INSERT INTO tweet ('user_id', 'content') VALUES ({}, '{}')".format(session['user_id'], request.form['tweet'])
             g.db.execute(insert_tweet_sql)
             g.db.commit()
-            return render_template('own_feed.html', session=session, tweets=tweets)
+            tweets = g.db.execute(get_tweets_sql).fetchall() # fetch tweets after new tweet has been added
+            return render_template('own_feed.html', session=session, user=user, tweets=tweets)
         else:
             abort(403) # lol who knew you could just do this
