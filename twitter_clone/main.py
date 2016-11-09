@@ -27,3 +27,16 @@ def login_required(f):
 
 
 # implement your views here
+@app.route('/login')
+def login():
+    return render_template('login.html')
+    
+@app.route('/')
+@login_required
+def index():
+    #if not authenticated:
+    #redirect to login
+    return redirect(url_for('login'))
+        
+    #if authenticated:
+        #return index
