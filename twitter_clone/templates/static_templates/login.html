@@ -33,6 +33,11 @@
   </div>
 </nav>
 
+{% if error %}
+<div class="alert alert-danger">
+  'Invalid username or password'
+</div>
+{% endif %}
 
 <div class="row">
     <div class="col-md-12">
