@@ -105,7 +105,7 @@ def login():
     if request.method == 'POST':
         # query db for users == user
         username = request.form['username']
-        password = md5(request.form['password']).hexdigest()
+        password = md5(request.form['password'].encode('utf-8')).hexdigest()
 
         user = query_db('SELECT * FROM user WHERE username = ? and password = ?',
                         [username, password], one=True)
