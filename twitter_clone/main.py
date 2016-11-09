@@ -101,12 +101,17 @@ def profile():
 @login_required
 def delete(tweet_id):
     # import ipdb; ipdb.set_trace()
-
-    if 2 > 1: # if authenticated (ie: the user owns the tweet)
-        raw_sql = 'DELETE FROM tweet WHERE tweet.id = {}'.format(tweet_id)
+    # find the tweet
+    # test doesn't check for this but need to make sure a logged in user cannot delete someone else's tweet
+    find_tweet_sql = 'SELECT * FROM tweet WHERE id={}'.format(tweet_id)
+    tweet = g.db.execute(find_tweet_sql).fetchone()
+    if tweet:
+        delete_tweet_sql = 'DELETE FROM tweet WHERE id={}'.format(tweet_id) # this isn't working
+        g.db.execute(delete_tweet_sql)
+        g.db.commit
         return redirect('/')
-    else: # not authenticated
-        return redirect(url_for('login'))
+    else:
+        abort(404) # tweet not found
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def view_feed(username):
@@ -123,7 +128,6 @@ def view_feed(username):
         '''.format(user_id)
 
         tweets = g.db.execute(get_tweets_sql).fetchall()
-        print tweets
 
         if 'username' in session: # viewer is logged in
             if session['username'] == username: # viewer is viewing their own feed
