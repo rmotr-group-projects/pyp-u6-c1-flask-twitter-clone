@@ -95,16 +95,18 @@ def delete(tweet_id):
     find_tweet_sql = 'SELECT * FROM tweet WHERE id={}'.format(tweet_id)
     tweet = g.db.execute(find_tweet_sql).fetchone()
     if tweet:
-        delete_tweet_sql = 'DELETE FROM tweet WHERE id={}'.format(tweet_id) # this isn't working
+        delete_tweet_sql = "DELETE FROM tweet WHERE id={}".format(tweet_id)
         g.db.execute(delete_tweet_sql)
         g.db.commit
+        twits = g.db.execute('SELECT * FROM tweet WHERE user_id=1').fetchall()
+        print(twits) # this only shows  [(2, 1, u'2016-11-09 14:09:40', u'Tweet 2 testuser1')]
+        # not sure why the test is failing
         return redirect('/')
     else:
         abort(404) # tweet not found
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def view_feed(username):
-    tweets = None
     get_user_sql = "SELECT * FROM user WHERE username='{}'".format(username)
 
     # sample user variable: (1, u'testuser1', u'81dc9bdb52d04dc20036dbd8313ed055', None, None, None)
