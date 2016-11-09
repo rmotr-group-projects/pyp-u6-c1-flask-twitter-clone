@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+
+
+        <div class="row">
+
+        {% for tweet in tweets %}
+            <div class="well well-large">
+
+
+                <div>
+                    <strong>@{{ tweet['username'] }}</strong>
+                    <span class="label label-primary">{{ tweet['timestamp'] }}</span>
+                </div>
+                <div>{{ tweet['content'] }}</div>
+
+
+            </div>
+        {% endfor %}
+
+
+        </div>
+    </div>
+    <div class="col-sm-2"></div>
+</div>
+{% endblock %}

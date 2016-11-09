@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <form role="form" action="" method="POST">
+		  <div class="form-group">
+		    <label for="username">Username</label>
+		    <input class="form-control" name="username" placeholder="Your username" value="{{ profile['username'] }}" readonly>
+		  </div>
+		  <div class="form-group">
+		    <label for="first_name">First name</label>
+		    <input class="form-control" name="first_name" placeholder="Your first name" value="{{ profile['first_name'] }}">
+		  </div>
+		  <div class="form-group">
+		    <label for="last_name">Last name</label>
+		    <input class="form-control" name="last_name" placeholder="Your last name" value="{{ profile['last_name'] }}">
+		  </div>
+		  <div class="form-group">
+		    <label for="birth_date">Birth date</label>
+		    <input class="form-control" name="birth_date" placeholder="Your birth date" value="{{ profile['birth_date']}}">
+		  </div>
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+    </div>
+</div>
+{% endblock %}
