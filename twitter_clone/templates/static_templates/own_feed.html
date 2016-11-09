@@ -1,85 +1,88 @@
-
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Twitter clone</title>
+<head>
+    <title>Twitter clone</title>
 
-        <!-- styles -->
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="../../static/css/styles.css">
-    </head>
-    <body>
-        <div class="container body-container">
+    <!-- styles -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../static/css/styles.css">
+</head>
+<body>
+<div class="container body-container">
 
-            <nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">Twitter clone</a>
-    </div>
-    <div id="navbar" class="navbar-collapse collapse">
-      <ul class="nav navbar-nav navbar-right">
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                        aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Twitter clone</a>
+            </div>
+            <div id="navbar" class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-right">
 
-            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> martinzugnoni</a></li>
-            <li><a href="/logout?next=%2Fmartinzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+                    <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> martinzugnoni</a></li>
+                    <li><a href="/logout?next=%2Fmartinzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log
+                        out</a></li>
 
-      </ul>
-    </div>
-  </div>
-</nav>
-
-
-<div class="row">
-    <div class="col-sm-2"></div>
-    <div class="col-sm-8">
-
-        <div class="row">
-            <form role="form" action="" method="POST">
-    		  <div class="form-group">
-                <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
-    		  </div>
-    		  <button type="submit" class="btn btn-info pull-right">Submit</button>
-    		</form>
+                </ul>
+            </div>
         </div>
+    </nav>
 
 
-        <div class="row">
-            
-            {% for t in tweets %}
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
 
-            <div class="well well-large">
-
-                <form action="/tweets/{{ t.id }}/delete" method="POST">
-                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+            <div class="row">
+                <form role="form" action="" method="POST">
+                    <div class="form-group">
+                        <textarea class="form-control" name="tweet" placeholder="Write your tweet here..."
+                                  required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-info pull-right">Submit</button>
                 </form>
+            </div>
 
 
-                <div>
-                    <strong>@{{ t.username }}</strong>
-                    <span class="label label-primary">{{ t.created }}</span>
-                </div>
-                <div>{{ t.content }}</div>
+            <div class="row">
+
+                {% for t in tweets %}
+
+                    <div class="well well-large">
+
+                        <form action="/tweets/{{ t.id }}/delete" method="POST">
+                            <button type="submit" class="close" title="Delete this tweet"><span
+                                    aria-hidden="true">&times;</span></button>
+                        </form>
+
+
+                        <div>
+                            <strong>@{{ t.username }}</strong>
+                            <span class="label label-primary">{{ t.created }}</span>
+                        </div>
+                        <div>{{ t.content }}</div>
+
+
+                    </div>
+
+                {% endfor %}
 
 
             </div>
-        
-            {% endfor %}
-
-
         </div>
+        <div class="col-sm-2"></div>
     </div>
-    <div class="col-sm-2"></div>
+
 </div>
+</body>
 
-        </div>
-    </body>
-
-    <!-- scripts -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
+<!-- scripts -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>
 </html>
