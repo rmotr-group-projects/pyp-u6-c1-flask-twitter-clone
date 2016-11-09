@@ -107,17 +107,24 @@ def delete(tweet_id):
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def own_feed(username):
+    tweets = None
     if session != {}:
         username = session['username']
         user_id = session['user_id']
         
         if request.method == 'GET':
             raw_sql = '''
-                SELECT u.username, t.content
-                FROM tweet t
-                LEFT JOIN user u on t.user_id = u.id
-                '''
-            g.db.execute(raw_sql)
+                SELECT *
+                FROM tweet 
+                WHERE tweet.user_id = '{}'
+            '''.format(user_id)
+            # raw_sql = '''
+            #     SELECT u.username, t.content
+            #     FROM tweet t
+            #     LEFT JOIN user u on t.user_id = u.id
+            #     '''
+            tweets = g.db.execute(raw_sql)
+            print(tweets)
         
         if request.method == 'POST':
             # check user is authenticated
@@ -129,6 +136,6 @@ def own_feed(username):
             '''.format(user_id, 'current_timestamp', tweet)
         
             
-    return render_template('own_feed.html', session=session)
+    return render_template('own_feed.html', session=session, tweets=tweets)
                  
         
