@@ -30,19 +30,23 @@ def login_required(f):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-    cursor = g.db.execute('SELECT username, password FROM user;')
-    users_pw = [dict(username=row[0], password=row[1]) for row in cursor.fetchall()]
+    cursor_pw = g.db.execute('SELECT username, password FROM user;')
+    cursor_id = g.db.execute('SELECT username, id FROM user;')
+    users_pw = dict(cursor_pw.fetchall())
+    users_id = dict(cursor_id.fetchall())
     
     if request.method == 'POST': # someone's trying to log in
+
         username = request.form['username']
         password = request.form['password']
         hashed_pw = md5(request.form['password'].encode('utf-8')).hexdigest()
         
-        if valid_credentials(username, hashed_pw):
-            session['user_id'] = 1 # hardcode for now it should be the user ID from the db
-            session['username'] = username
-            
-            return redirect(url_for('index'))
+        if username in users_pw:
+            if users_pw[username] == hashed_pw:
+                session['user_id'] =  users_id[username]
+                session['username'] = username
+                return redirect(url_for('index'), code=302)
+                # return redirect(url_for('index'))
         else:
             error = "Invalid username or password"
 
@@ -61,15 +65,70 @@ def logout():
 
     return redirect(url_for('index'))
     
-def valid_credentials(username, hashed_pw):
-    if username == 'testuser1' : # hardcoded for now. implement sql checking
-        # should return the user's ID somehow for session
-        return True
-    else:
-        return False
-        
-@app.route('/profile')
+
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     username = session['username']
+    if request.method == 'GET':
+        # get all the tweets
+        pass
+    elif request.method == 'POST':
+        birth_date = request.form['birth_date']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        raw_sql = '''
+            UPDATE user 
+            SET birth_date = '{}', first_name = '{}', last_name = '{}' 
+            WHERE username = '{}'
+        '''.format(birth_date, first_name, last_name, session['username'])
+        
+        g.db.execute(raw_sql)
+        g.db.commit()
+        
     return render_template('profile.html', username = username)
+
+# for passing parameters `<int:` makes sure the param is an integer
+# @app.route('/page/<page_id>')
+# def page(page_id):
+#     pageid = page_id
+
+@app.route('/tweets/<int:tweet_id>/delete')
+def delete(tweet_id):
+    import ipdb; ipdb.set_trace()
+    print('test')
+    print(request)
+    
+    if 2 > 1: # if authenticated (ie: the user owns the tweet)
+        raw_sql = 'DELETE FROM tweet WHERE tweet.id = {}'.format(tweet_id)
+        return redirect(url_for('index'))
+    else: # not authenticated
+        return redirect(url_for('login'))
+
+@app.route('/<username>', methods=['GET', 'POST'])
+def own_feed(username):
+    if session != {}:
+        username = session['username']
+        user_id = session['user_id']
+        
+        if request.method == 'GET':
+            raw_sql = '''
+                SELECT u.username, t.content
+                FROM tweet t
+                LEFT JOIN user u on t.user_id = u.id
+                '''
+            g.db.execute(raw_sql)
+        
+        if request.method == 'POST':
+            # check user is authenticated
+            # if yes, post a tweet
+            tweet = request.form['tweet']
+            raw_sql = '''
+            INSERT INTO tweet(user_id, created, content)
+            VALUES({},{},{})
+            '''.format(user_id, 'current_timestamp', tweet)
+        
+            
+    return render_template('own_feed.html', session=session)
+                 
+        

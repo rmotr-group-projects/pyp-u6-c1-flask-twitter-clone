@@ -38,7 +38,7 @@
 <div class="row">
     <div class="col-sm-2"></div>
     <div class="col-sm-8">
-
+    {% if session != {} %}
         <div class="row">
             <form role="form" action="" method="POST">
     		  <div class="form-group">
@@ -47,7 +47,6 @@
     		  <button type="submit" class="btn btn-info pull-right">Submit</button>
     		</form>
         </div>
-
 
         <div class="row">
 
@@ -179,7 +178,7 @@
 
 
             </div>
-
+        {% endif %}
 
         </div>
     </div>
