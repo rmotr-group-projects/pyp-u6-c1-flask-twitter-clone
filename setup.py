@@ -31,7 +31,7 @@ setup(
     packages=['twitter_clone'],
     maintainer='rmotr.com',
     tests_require=[
-        'pytest==2.9.2',
+        'pytest==2.9.1',
         'pytest-cov==2.2.1',
         'coverage==4.0.3',
         'tox==2.3.1',

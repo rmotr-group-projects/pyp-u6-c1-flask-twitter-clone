@@ -1,0 +1,35 @@
+{% extends "static_templates/layout.html" %}
+{% block body %}
+
+    <div class="row">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-8">
+
+            <div class="row">
+
+                {% for u in users %}
+                    <div class="well well-large">
+
+                        <div>
+                            <h3 class="">{{ u.first_name }} {{ u.last_name }}</h3>
+                            <a href="/{{ u.username }}">
+                                <strong>@{{ u.username }}</strong>
+                            </a>
+                            <form action="/follow/{{ u.id }}" method="POST">
+                                <button type="submit" class="label label-primary" title="Follow this user"><span
+                                        aria-hidden="true">FOLLOW</span></button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+
+            </div>
+        </div>
+        <div class="col-sm-2"></div>
+    </div>
+
+
+{% endblock %}
