@@ -1,4 +1,5 @@
 import sqlite3
+from sqlite3 import IntegrityError
 from hashlib import md5
 from functools import wraps
 from flask import Flask
@@ -49,21 +50,44 @@ def feed(username):
 
         flash('New entry was successfully posted')
 
-    tweets = query_db('''
-    SELECT t.*, u.username FROM tweet t INNER JOIN user u 
-            ON t.user_id = u.id 
-            WHERE username=? ORDER BY t.created DESC''', [username])
-
     if username == session.get('username'):
+        tweets = query_db('''
+                SELECT t.*, u.username FROM tweet t
+                INNER JOIN user u ON t.user_id = u.id WHERE EXISTS
+                  (SELECT * FROM following f WHERE f.user_id = ?) ORDER BY t.created DESC''',
+                          [session.get('user_id')])
+
         return render_template('static_templates/own_feed.html', tweets=tweets)
+
     else:
+        print(username)
+        tweets = query_db('''
+            SELECT t.*, u.username FROM tweet t INNER JOIN user u
+                   ON t.user_id = u.id
+                   WHERE username=? ORDER BY t.created DESC''', [username])
+
         return render_template('static_templates/other_feed.html', tweets=tweets)
 
 
 @app.route('/')
 @login_required
 def home():
-    return redirect(url_for('feed', username=session.get('username')))
+    users = query_db('''
+            SELECT * FROM user
+            WHERE id != ? ORDER BY username''', [session.get('user_id')])
+    return render_template('static_templates/home.html', users=users)
+    # return redirect(url_for('feed', username=session.get('username')))
+
+
+@app.route('/follow/<int:id>', methods=['POST'])
+@login_required
+def follow(id):
+    try:
+        query_db('INSERT INTO following(user_id, follower_id) VALUES(?, ?)', [session.get('user_id'), id])
+        g.db.commit()
+    except IntegrityError:
+        flash('You are already following this user.')
+    return redirect('/')
 
 
 @app.route('/tweets/<int:id>/delete', methods=['POST'])
