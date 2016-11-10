@@ -41,7 +41,8 @@ def login():
             'SELECT id, password FROM user WHERE username=:username;',
             {'username': username})
         user = cursor.fetchone()
-        if user and user[1] == md5(password).hexdigest():
+        hashed_passwd = md5(password.encode('utf-8')).hexdigest()
+        if user and user[1] == hashed_passwd:
             session['user_id'] = user[0]
             session['username'] = username
             flash('You were correctly logged in', 'success')
