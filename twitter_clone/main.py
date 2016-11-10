@@ -53,9 +53,9 @@ def feed(username):
     if username == session.get('username'):
         tweets = query_db('''
                 SELECT t.*, u.username FROM tweet t
-                INNER JOIN user u ON t.user_id = u.id WHERE EXISTS
+                INNER JOIN user u ON t.user_id = u.id WHERE t.user_id = ? OR EXISTS
                   (SELECT * FROM following f WHERE f.user_id = ?) ORDER BY t.created DESC''',
-                          [session.get('user_id')])
+                          [session.get('user_id'), session.get('user_id')])
 
         return render_template('static_templates/own_feed.html', tweets=tweets)
 
