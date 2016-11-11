@@ -26,7 +26,6 @@ def login_required(f):
     return decorated_function
 
 
-# implement your views here
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -92,15 +91,12 @@ def profile():
 @login_required
 def delete(tweet_id):
     # test doesn't check for this but need to make sure a logged in user cannot delete someone else's tweet
+
     find_tweet_sql = 'SELECT * FROM tweet WHERE id={}'.format(tweet_id)
     tweet = g.db.execute(find_tweet_sql).fetchone()
     if tweet:
-        delete_tweet_sql = "DELETE FROM tweet WHERE id={}".format(tweet_id)
-        g.db.execute(delete_tweet_sql)
-        g.db.commit
-        twits = g.db.execute('SELECT * FROM tweet WHERE user_id=1').fetchall()
-        print(twits) # this only shows  [(2, 1, u'2016-11-09 14:09:40', u'Tweet 2 testuser1')]
-        # not sure why the test is failing
+        g.db.execute("DELETE FROM tweet WHERE id={}".format(tweet_id))
+        g.db.commit()
         return redirect('/')
     else:
         abort(404) # tweet not found
