@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% block body %}
+    <div class="col-sm-8 col-sm-offset-2">
+
+        <div class="row">
+            <form role="form" action="" method="POST">
+    		  <div class="form-group">
+                <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
+    		  </div>
+    		  <button type="submit" class="btn btn-info pull-right">Submit</button>
+    		</form>
+        </div>
+
+        <div class="row">
+
+            {% for tweet in tweets %}
+        
+            <div class="well well-large">
+
+                <form action="{{ url_for('tweet_delete', id=tweet['id']) }}" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+                <div>
+                    <strong>@{{ session['username'] }}</strong>
+                    <span class="label label-primary">{{ tweet['created'] }}</span>
+                </div>
+                <div>{{ tweet['text'] }}</div>
+
+            </div>
+            
+            {% endfor %}
+            
+        </div>
+</div>
+{% endblock %}
