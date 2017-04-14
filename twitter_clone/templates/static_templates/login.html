@@ -25,8 +25,12 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
-
-            <li><a href="/login?next=%2Flogin"><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
+    {% if session.username %}
+            <li><a href={{ url_for('logout', next=request.path) }}><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
+    
+    {% else %}
+            <li><a href={{ url_for('login', next=request.path) }}><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
+    {% endif %}
 
       </ul>
     </div>
@@ -36,7 +40,7 @@
 
 <div class="row">
     <div class="col-md-12">
-        <form role="form" action="" method="POST">
+        <form role="form" action="/process_login" method="POST">
 		  <div class="form-group">
 		    <label for="username">Username</label>
 		    <input class="form-control" name="username" placeholder="Your username">
