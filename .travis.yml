@@ -14,3 +14,11 @@ install:
 
 script:
   - "PYTHONPATH=. py.test --cov=twitter_clone tests"
+
+notifications:
+  webhooks:
+    urls:
+      - https://rmotr.com/api/v1/webhooks/travis/project-resolved
+    on_success: always
+    on_failure: never
+    on_start: never

@@ -2,6 +2,15 @@
 
 Today's project consists on building a Twitter clone using Flask.
 
+## About Flask
+
+Flask is a very used Python micro Web Framework. It provides basic functionality to build web applications, like routing, request/response handling, etc. It's a "small" framework compared to other ones (like Django), but in many cases that's a great advantage.
+
+If you are not familiar with Flask, we encourge you to take a look at these resources:
+- Step by step Flask sample project: [https://github.com/rmotr/flask-introduction](https://github.com/rmotr/flask-introduction)
+- FREE Flask course in Learn: [http://learn.rmotr.com/python/flask-tutorial-step-by-step](http://learn.rmotr.com/python/flask-tutorial-step-by-step)
+- Or the same FREE course hosted in Udemy: [https://www.udemy.com/python-flask-tutorial-step-by-step](https://www.udemy.com/python-flask-tutorial-step-by-step)
+
 ## Setting up the database
 
 Our data model contains just two tables (`user` and `tweet`), which are going to be stored using `SQLite`. You can use the file `twitter-schema.sql` to create your local database schema, using the following command:
