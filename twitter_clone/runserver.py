@@ -1,6 +1,8 @@
 
 import os
-
+import sys
+#Included the line below, to modify the sys path
+sys.path.append( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 from twitter_clone.main import app
 from twitter_clone import settings
 
