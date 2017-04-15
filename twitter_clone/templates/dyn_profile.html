@@ -37,6 +37,17 @@
 
 <div class="row">
     <div class="col-md-12">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="row">
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        {% endwith %}
         <form role="form" action="" method="POST">
 		  <div class="form-group">
 		    <label for="username"> Username</label>

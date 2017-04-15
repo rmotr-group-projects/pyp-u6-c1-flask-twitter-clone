@@ -26,8 +26,8 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
 
-            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> martinzugnoni</a></li>
-            <li><a href="/logout?next=%2Fmartinzugnoni"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> {{ username }}</a></li>
+            <li><a href="/logout?next=%2F{{ username}}"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
 
       </ul>
     </div>
@@ -50,25 +50,23 @@
 
 
         <div class="row">
+            {% for tweet in tweets %}
 
-            {% for tweet in own_feed %}
-                <div class="well well-large">
-    
-                    <form action="/tweets/{{ id }}/delete?next=http://localhost:8080/{{ username }}" method="POST">
-                        <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
-                    </form>
-    
-    
-                    <div>
-                        <strong>@{{ username }}</strong>
-                        <span class="label label-primary">{{ created }}</span>
-                    </div>
-                    <div>{{ content }}</div>
-    
-    
+            <div class="well well-large">
+
+                <form action="/tweets/{{ tweet['id'] }}/delete?next=http://localhost:8080/{{ username }}" method="POST">
+                    <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+                </form>
+
+                <div>
+                    <strong>@{{ tweet['username'] }}</strong>
+                    <span class="label label-primary"> {{ tweet['created'] }}</span>
                 </div>
-            {% endfor %}
+                <div> {{ tweet['content'] }}</div>
 
+
+            </div>
+            {% endfor %}
 
         </div>
     </div>
