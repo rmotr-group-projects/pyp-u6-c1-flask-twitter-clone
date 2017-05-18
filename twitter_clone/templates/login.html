@@ -25,22 +25,29 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
-    {% if session.username %}
-            <li><a href={{ url_for('logout', next=request.path) }}><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
-    
-    {% else %}
-            <li><a href={{ url_for('login', next=request.path) }}><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
-    {% endif %}
+
+            <li><a href="/login?next=%2Flogin"><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
 
       </ul>
     </div>
   </div>
 </nav>
 
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="row">
+<ul>
+{% for message in messages %}
+<li>{{ message }}</li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+{% endwith %}
 
 <div class="row">
     <div class="col-md-12">
-        <form role="form" action="/process_login" method="POST">
+        <form role="form" action="" method="POST">
 		  <div class="form-group">
 		    <label for="username">Username</label>
 		    <input class="form-control" name="username" placeholder="Your username">

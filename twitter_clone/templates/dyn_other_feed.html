@@ -25,12 +25,9 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
-    {% if session.username %}
-            <li><a href={{ url_for('logout', next=request.path) }}><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
-    
-    {% else %}
-            <li><a href={{ url_for('login', next=request.path) }}><i class="fa fa-sign-in" aria-hidden="true"></i> Log in</a></li>
-    {% endif %}
+
+            <li><a href="/profile"><i class="fa fa-user" aria-hidden="true"></i> {{ username }}</a></li>
+            <li><a href="/logout?next=%2F{{ username }}"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
 
       </ul>
     </div>
@@ -39,19 +36,29 @@
 
 
 <div class="row">
-    <div class="col-md-12">
-        <form role="form" action="/process_login" method="POST">
-		  <div class="form-group">
-		    <label for="username">Username</label>
-		    <input class="form-control" name="username" placeholder="Your username">
-		  </div>
-		  <div class="form-group">
-		    <label for="password">Password</label>
-		    <input type="password" class="form-control" name="password" placeholder="Your password">
-		  </div>
-		  <button type="submit" class="btn btn-default">Submit</button>
-		</form>
+    <div class="col-sm-2"></div>
+    <div class="col-sm-8">
+
+
+        <div class="row">
+
+            {% for tweet in tweets %}
+                <div class="well well-large">
+    
+    
+                    <div>
+                        <strong>@{{ tweet['username'] }}</strong>
+                        <span class="label label-primary">{{ tweet['created'] }}</span>
+                    </div>
+                    <div>{{ tweet['content'] }}</div>
+    
+    
+                </div>
+            {% endfor %}
+            
+        </div>
     </div>
+    <div class="col-sm-2"></div>
 </div>
 
         </div>
