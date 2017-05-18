@@ -28,6 +28,9 @@ CREATE TABLE tweet (
   )
 );
 
+--WARNING: THE BELOW LINES MUST BE COMMENTED BEFORE YOU RUN YOUR TESTS
+--         FAILURE TO DO SO WILL CAUSE YOUR TESTS TO FAIL
+
 --INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (10, "martinzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-01-26");
 --INSERT INTO "user" ("id", "username", "password", "birth_date") VALUES (11, "ivanzugnoni", "81dc9bdb52d04dc20036dbd8313ed055", "2016-07-06");
 --INSERT INTO "tweet" ("user_id", "content") VALUES (10, "Hello World!");
