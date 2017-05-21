@@ -1,4 +1,3 @@
-
 import os
 
 from twitter_clone.main import app
