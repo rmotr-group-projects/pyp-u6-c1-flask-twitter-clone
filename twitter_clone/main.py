@@ -3,7 +3,7 @@ from hashlib import md5
 from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
-                   flash, url_for)
+                   flash, url_for, abort)
 
 app = Flask(__name__)
 
@@ -135,29 +135,32 @@ def other_feed(uid, usr):
         flash(tweets)
         return render_template('static_templates/other_feed.html', **tweets)
     
+    if request.method == 'POST':
+        return abort(403)
 
 
-@app.route('/tweets/<some_id>/delete', methods=['GET','POST'])
-@login_required
+
+@app.route('/tweets/<some_id>/delete', methods=['POST'])
+#@login_required
 def delete_tweet(some_id):
     '''
     This function alters the MODEL of a user's tweet TABLE in the db.
     It will delete the desired tweet (informed by the POST request sent by clicking a given delete button)
     '''
     next = request.args.get('next', '/')
-    if request.method == 'POST':
-        if not some_id.isdigit():
-            return render_template(next), 404
-        cursor = g.db.cursor()
-        cursor.execute('DELETE FROM tweet WHERE id=?', [some_id])
+    if not some_id.isdigit():
+        return render_template('/login.html'), 404
+        
+    @login_required
+    def func():
+        g.db.execute('DELETE FROM tweet WHERE id=? AND user_id=?', [some_id, session['user_id']])
         g.db.commit()
         
-        tweets = gen_feed(uid=session['user_id'], usr=session['username'])
             
         return redirect(next)
         
-    if request.method == 'GET':
-        return render_template(next), 404
+    return func()
+    
   
 
 @app.route('/', methods=['GET', 'POST'])
@@ -176,20 +179,22 @@ def process_usr_request(usr):
     This function CONTROLS the page of a specified user. 
     If the desired 'usr' is the currently logged in user, serve up the homepage slash 'own_feed' template
     '''
+    
     if 'username' in session:
         if usr == session['username']:
-             return homepage()
+            return homepage()
+
          
     cursor = g.db.cursor()
         
     cursor.execute('SELECT id FROM user WHERE username=?', [usr])
     
-    choice = cursor.fetchone()
+    result = cursor.fetchone()
     
-    if choice is not None:
-        return other_feed(choice[0], usr)
+    if result is not None:
+        return other_feed(result[0], usr)
         
-    return redirect(url_for('login'), 404)
+    # return redirect(url_for('login'), 403)
 
    
    
@@ -242,5 +247,3 @@ def gen_feed(uid, usr):
     tweets['username'] = usr
             
     return tweets
-    
-    
