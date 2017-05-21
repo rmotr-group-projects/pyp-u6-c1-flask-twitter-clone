@@ -33,9 +33,15 @@
   </div>
 </nav>
 
-
 <div class="row">
     <div class="col-md-12">
+        {% with messages = get_flashed_messages() %}
+            {% if messages[0] == "Invalid username or password." %}
+                <div class="alert alert-danger">
+                    <strong>Error!</strong> Invalid username or password. Please try again.
+                </div>
+            {% endif %}
+        {% endwith %}
         <form role="form" action="" method="POST">
 		  <div class="form-group">
 		    <label for="username">Username</label>
