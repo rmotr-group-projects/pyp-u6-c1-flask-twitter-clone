@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% block body %}
+    {% for tweet in tweets %}
+        <div class="well well-large">
+            
+            <div>
+                <strong>@{{ username }}</strong>
+                <span class="label label-primary">{{ tweet['created'] }}</span>
+            </div>
+            <div>{{ tweet['text'] }}</div>
+        
+        </div>
+    {% endfor %}
+{% endblock %}

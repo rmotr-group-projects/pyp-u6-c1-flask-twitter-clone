@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Twitter clone</title>
+        <title>Tweetr</title>
 
         <!-- styles -->
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -35,6 +35,11 @@
 
 
 <div class="row">
+    {% if message %}
+    <div class="col-md-12">
+        <p class="alert {{ message[0] }}">{{ message[1] }}</p>
+    </div>
+    {% endif %}
     <div class="col-md-12">
         <form role="form" action="" method="POST">
 		  <div class="form-group">
