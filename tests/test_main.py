@@ -49,7 +49,6 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 302)
         self.assertIn('http://localhost/login', response.location)
-
         response = self.client.get('/', follow_redirects=True)
         self.assertIn('<form', response.data.decode('utf-8'))
         self.assertEqual(response.status_code, 200)
@@ -64,7 +63,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
             self.assertEqual(response.status_code, 302)
             self.assertEqual(response.location, 'http://localhost/')
 
-    def test_login_user_does_not_exist(self):
+    def test_login_user_does_not_exist(self): 
         response = self.client.post(
             '/login',
             data={'username': 'donotexist',
@@ -101,7 +100,7 @@ class AuthenticationTestCase(BaseTwitterCloneTestCase):
 
 
 class FeedTestCase(BaseTwitterCloneTestCase):
-
+#passed
     def test_feed_not_authenticated_readonly(self):
         response = self.client.get('/testuser1')
         self.assertEqual(response.status_code, 200)
@@ -110,7 +109,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
         self.assertTrue('Tweet 1 testuser1' in data)
         self.assertTrue('Tweet 2 testuser1' in data)
         self.assertFalse('Tweet 1 testuser2' in data)
-
+#passed
     def test_feed_authenticated_get(self):
         with app.test_client() as client:
             client.post(
@@ -125,7 +124,7 @@ class FeedTestCase(BaseTwitterCloneTestCase):
             self.assertTrue('Tweet 1 testuser1' in data)
             self.assertTrue('Tweet 2 testuser1' in data)
             self.assertFalse('Tweet 1 testuser2' in data)
-
+#passed
     def test_feed_authenticated_get_other_users_feed(self):
         with app.test_client() as client:
             client.post(
