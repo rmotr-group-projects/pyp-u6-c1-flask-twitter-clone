@@ -14,7 +14,7 @@ def connect_db():
 
 @app.before_request
 def before_request():
-    g.db_conn = connect_db()
+    g.db = connect_db()
 
 
 def login_required(f):
