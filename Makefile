@@ -5,13 +5,4 @@ END=" \#\#\# \033[0m\n"
 
 test:
 	@echo $(TAG)Running tests$(END)
-	PYTHONPATH=. py.test -s tests
-
-test-cov:
-	@echo $(TAG)Running tests with coverage$(END)
-	PYTHONPATH=. py.test --cov=twitter_clone tests
-
-coverage:
-	@echo $(TAG)Coverage report$(END)
-	@PYTHONPATH=. coverage run --source=twitter_clone $(shell which py.test) ./tests -q --tb=no >/dev/null; true
-	@coverage report
+	PYTHONPATH=. py.test -v --tb=short tests

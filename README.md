@@ -27,13 +27,29 @@ Note: The `password` field in `user` table is stored as the MD5 hash of the user
 
 ## Running the app server
 
-Flask framework provides, out of the box, a way to run a development web server in your local machine. Just execute the `runserver.py` script available in the project and the application will stay listening at `localhost:8080`. (Make sure to have all the requirements previously installed)
+Flask framework provides, out of the box, a way to run a development web server in your local machine. Just execute the `run_app.py` script available in the project and the application will stay listening at `localhost:8080`. (Make sure to have all the requirements previously installed)
 
 ```bash
-$ python twitter_clone/runserver.py
+$ python run_app.py
 ```
 
-Note: Your will probably need to configure the `PYTHONPATH` env variable to make the project work correctly.
+## Running tests
+
+Tests are split among several files. You can run them all together doing `make test` or select individual ones with `py.test` syntax. Make sure you include the `PYTHONPATH` variable:
+
+```bash
+# All Tests
+$ make test
+
+# All Tests with py.test
+$ PYTHONPATH=. py.test tests/
+
+# Only test_profile.py
+$ PYTHONPATH=. py.test tests/test_profile.py
+
+# Only tests matching the name test_profile_authenticated_post from test_profile.py
+$ PYTHONPATH=. py.test tests/test_profile.py -k test_profile_authenticated_post
+```
 
 ## The application
 
