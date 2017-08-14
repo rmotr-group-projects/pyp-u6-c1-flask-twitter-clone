@@ -1,6 +1,7 @@
 from hashlib import md5
 from flask import session
 
+from twitter_clone.main import app
 from . import BaseTwitterCloneTestCase
 
 
