@@ -10,11 +10,11 @@ _(Login using `martinzugnoni` and `1234` as username and password)_
 
 ---
 
-Today's project consists on building a Twitter clone using Flask.
+Today's project consists of building a Twitter clone using Flask.
 
 ## About Flask
 
-Flask is a very used Python micro Web Framework. It provides basic functionality to build web applications, like routing, request/response handling, etc. It's a "small" framework compared to other ones (like Django), but in many cases that's a great advantage.
+Flask is a highly used Python micro Web Framework. It provides basic functionality to build web applications, like routing, request/response handling, etc. It's a "small" framework compared to other ones (like Django), but in many cases that's a great advantage.
 
 If you are not familiar with Flask, we encourge you to take a look at these resources:
 - Step by step Flask sample project: [https://github.com/rmotr/flask-introduction](https://github.com/rmotr/flask-introduction)
