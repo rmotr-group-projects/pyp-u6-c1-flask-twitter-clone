@@ -39,7 +39,7 @@ def login():
         password = request.form['password']
         cursor = g.db.cursor()
         cursor.execute(
-            'SELECT id, password FROM twitter_user WHERE username=:username;',
+            'SELECT id, password FROM twitter_user WHERE username=%(username)s;',
             {'username': username})
         user = cursor.fetchone()
         hashed_passwd = md5(password.encode('utf-8')).hexdigest()
