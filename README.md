@@ -1,4 +1,13 @@
-# [pyp-w4] Twitter clone
+# Twitter clone
+
+This is the 1st project of Unit 6 from our [Advanced Python Programming course](https://rmotr.com/advanced-python-programming).
+
+---
+
+**👉 Demo: https://pyp-u6-c1-flask-twitter-clone.herokuapp.com/**
+_(Login using `martinzugnoni` and `1234` as username and password)_
+
+---
 
 Today's project consists on building a Twitter clone using Flask.
 
@@ -95,3 +104,12 @@ To make this application even more similar to the real Twitter service, we shoul
 Aside from extra tables and relationships in the database, part of the app logic should be modified. For example, in a user's feed we should display all tweets from people he is following, and not only his own tweets.
 
 Re tweeting would also be a plus.
+
+
+## Heroku Deploy
+
+This is out of the scope of the project and course, but if you want to try deploying it on Heroku it's super simple. In this very same repo you'll find a branch named [heroku-deployment](https://github.com/rmotr-group-projects/pyp-u6-c1-flask-twitter-clone/tree/heroku-deployment) that has the final working code + all the config to work on Heroku (plus database fixes, see below).
+
+But first, take a look at our tutorial on [How to deploy a Flask app to Heroku](https://www.youtube.com/watch?v=wb6K0o8uv7s). You can also follow [that example repo](https://github.com/rmotr-curriculum/flask-heroku-example) as a general guideline.
+
+**Important:** It's not recommended to use sqlite on Heroku as they have superfluous storage, which gets erased once per day. General Heroku deploys use Postgres (which is a free add-on). To make the app work with Postgres you might have to do a few changes to the initial schema and the queries. Check the branch [heroku-deployment](https://github.com/rmotr-group-projects/pyp-u6-c1-flask-twitter-clone/tree/heroku-deployment) for more info.
