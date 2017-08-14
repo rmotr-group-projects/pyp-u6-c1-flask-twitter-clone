@@ -134,7 +134,7 @@ def feed(username):
         """
         SELECT u.username, u.first_name, u.last_name, t.id, t.created, t.content
         FROM twitter_user AS u JOIN tweet t ON (u.id=t.user_id)
-        WHERE u.username=%(username)s ORDER BY datetime(created) DESC;
+        WHERE u.username=%(username)s ORDER BY created DESC;
         """,
         {'username': username})
     tweets = [dict(username=row[0], id=row[3], created=row[4], content=row[5])
