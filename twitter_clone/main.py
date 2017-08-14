@@ -37,7 +37,8 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        cursor = g.db.execute(
+        cursor = g.db.cursor()
+        cursor.execute(
             'SELECT id, password FROM twitter_user WHERE username=:username;',
             {'username': username})
         user = cursor.fetchone()
@@ -80,14 +81,16 @@ def profile():
             'username': session['username']
         }
         try:
-            g.db.execute(query, params)
+            cursor = g.db.cursor()
+            cursor.execute(query, params)
             g.db.commit()
-        except sqlite3.IntegrityError:
+        except:
             flash('Something went wrong while updating your profile', 'danger')
         else:
             flash('Your profile was correctly updated', 'success')
 
-    cursor = g.db.execute(
+    cursor = g.db.cursor()
+    cursor.execute(
         'SELECT username, first_name, last_name, birth_date FROM twitter_user WHERE username=:username;',
         {'username': session['username']})
     username, first_name, last_name, birth_date = cursor.fetchone()
@@ -109,22 +112,25 @@ def feed(username):
             query = 'INSERT INTO tweet ("user_id", "content") VALUES (:user_id, :content);'
             params = {'user_id': session['user_id'], 'content': tweet}
             try:
-                g.db.execute(query, params)
+                cursor = g.db.cursor()
+                cursor.execute(query, params)
                 g.db.commit()
-            except sqlite3.IntegrityError:
+            except:
                 flash('Something went wrong while saving your tweet', 'danger')
             else:
                 flash('Thanks for your tweet!', 'success')
 
     # check if given username exists
-    cursor = g.db.execute(
+    cursor = g.db.cursor()
+    cursor.execute(
         'SELECT id FROM twitter_user WHERE username=:username;', {'username': username})
     user = cursor.fetchone()
     if not user:
         return render_template('404.html'), 404
 
     # fetch all tweets from given username
-    cursor = g.db.execute(
+    cursor = g.db.cursor()
+    cursor.execute(
         """
         SELECT u.username, u.first_name, u.last_name, t.id, t.created, t.content
         FROM twitter_user AS u JOIN tweet t ON (u.id=t.user_id)
@@ -140,12 +146,13 @@ def feed(username):
 @login_required
 def tweet(tweet_id):
     next = request.args.get('next', '/')
-    cursor = g.db.execute(
+    cursor = g.db.cursor()
+    cursor.execute(
         'SELECT * FROM tweet WHERE id=:tweet_id AND user_id=:user_id;',
         {'tweet_id': tweet_id, 'user_id': session['user_id']})
     if not cursor.fetchone():
         return render_template('404.html'), 404
-    g.db.execute(
+    cursor.execute(
         'DELETE FROM tweet WHERE id=:tweet_id AND user_id=:user_id',
         {'tweet_id': tweet_id, 'user_id': session['user_id']})
     g.db.commit()
