@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-sm-2"></div>
+  <div class="col-sm-8">
+    {% if session.username and session.username == feed_username %}
+    <div class="row">
+      <form role="form" action="" method="POST">
+        <div class="form-group">
+          <textarea class="form-control" name="tweet" placeholder="Write your tweet here..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-info pull-right">Submit</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <div class="row">
+      {% if tweets %}
+        {% for tweet in tweets %}
+          <div class="well well-large">
+            {% if session.username and session.username == feed_username %}
+            <form action="/tweets/{{ tweet.id }}/delete?next={{ request.url }}" method="POST">
+              <button type="submit" class="close" title="Delete this tweet"><span aria-hidden="true">&times;</span></button>
+            </form>
+            {% endif %}
+
+            <div>
+              <strong>@{{ tweet.username }}</strong>
+              <span class="label label-primary">{{ tweet.created }}</span>
+            </div>
+            <div>{{tweet.content}}</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="well well-large">
+          Sorry, no tweets 😥
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-sm-2"></div>
+</div>
+{% endblock %}
