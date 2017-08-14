@@ -1,4 +1,4 @@
-import sqlite3
+import psycopg2
 from hashlib import md5
 from functools import wraps
 from flask import Flask
@@ -8,13 +8,13 @@ from flask import (g, request, session, redirect, render_template,
 app = Flask(__name__)
 
 
-def connect_db(db_name):
-    return sqlite3.connect(db_name)
+def connect_db():
+    return psycopg2.connect(app.config['DATABASE_URL'])
 
 
 @app.before_request
 def before_request():
-    g.db = connect_db(app.config['DATABASE'][1])
+    g.db_conn = connect_db()
 
 
 def login_required(f):
@@ -38,7 +38,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         cursor = g.db.execute(
-            'SELECT id, password FROM user WHERE username=:username;',
+            'SELECT id, password FROM twitter_user WHERE username=:username;',
             {'username': username})
         user = cursor.fetchone()
         hashed_passwd = md5(password.encode('utf-8')).hexdigest()
@@ -69,7 +69,7 @@ def logout():
 def profile():
     if request.method == 'POST':
         query = """
-            UPDATE user
+            UPDATE twitter_user
             SET first_name=:first_name, last_name=:last_name, birth_date=:birth_date
             WHERE username=:username;
         """
@@ -88,7 +88,7 @@ def profile():
             flash('Your profile was correctly updated', 'success')
 
     cursor = g.db.execute(
-        'SELECT username, first_name, last_name, birth_date FROM user WHERE username=:username;',
+        'SELECT username, first_name, last_name, birth_date FROM twitter_user WHERE username=:username;',
         {'username': session['username']})
     username, first_name, last_name, birth_date = cursor.fetchone()
     return render_template('profile.html', username=username, first_name=first_name,
@@ -118,7 +118,7 @@ def feed(username):
 
     # check if given username exists
     cursor = g.db.execute(
-        'SELECT id FROM user WHERE username=:username;', {'username': username})
+        'SELECT id FROM twitter_user WHERE username=:username;', {'username': username})
     user = cursor.fetchone()
     if not user:
         return render_template('404.html'), 404
@@ -127,7 +127,7 @@ def feed(username):
     cursor = g.db.execute(
         """
         SELECT u.username, u.first_name, u.last_name, t.id, t.created, t.content
-        FROM user AS u JOIN tweet t ON (u.id=t.user_id)
+        FROM twitter_user AS u JOIN tweet t ON (u.id=t.user_id)
         WHERE u.username=:username ORDER BY datetime(created) DESC;
         """,
         {'username': username})
