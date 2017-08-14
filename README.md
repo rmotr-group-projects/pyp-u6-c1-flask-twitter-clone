@@ -33,7 +33,9 @@ $ sqlite3 twitter.db < twitter-schema.sql
 
 Once your database is set up, you will probably need some pre loaded data before you can start testing your app. Feel free to use SQL queries to fill both tables with information. In the `twitter-schema.sql` file you will see some sample queries commented out.
 
-Note: The `password` field in `user` table is stored as the MD5 hash of the user's password. **Remember to never store any password as plain text**
+Note: The `password` field in `user` table is stored as the MD5 hash of the user's password. **Remember to never store any password as plain text**.
+
+It's important to note that [MD5](https://en.wikipedia.org/wiki/MD5) is a **vulnerable** hash function and it's **NOT recommended** for production. For more information see [this issue created by @mester](https://github.com/rmotr-group-projects/pyp-u6-c1-flask-twitter-clone/issues/5)
 
 ## Running the app server
 
