@@ -71,8 +71,8 @@ def profile():
     if request.method == 'POST':
         query = """
             UPDATE twitter_user
-            SET first_name=:first_name, last_name=:last_name, birth_date=:birth_date
-            WHERE username=:username;
+            SET first_name=%(first_name)s, last_name=%(last_name)s, birth_date=%(birth_date)s
+            WHERE username=%(username)s;
         """
         params = {
             'first_name': request.form.get('first_name'),
@@ -91,7 +91,7 @@ def profile():
 
     cursor = g.db.cursor()
     cursor.execute(
-        'SELECT username, first_name, last_name, birth_date FROM twitter_user WHERE username=:username;',
+        'SELECT username, first_name, last_name, birth_date FROM twitter_user WHERE username=%(username)s;',
         {'username': session['username']})
     username, first_name, last_name, birth_date = cursor.fetchone()
     return render_template('profile.html', username=username, first_name=first_name,
@@ -109,7 +109,7 @@ def feed(username):
         if not tweet:
             flash('Please write something in your tweet', 'danger')
         else:
-            query = 'INSERT INTO tweet ("user_id", "content") VALUES (:user_id, :content);'
+            query = 'INSERT INTO tweet ("user_id", "content") VALUES (%(user_id)s, %(content)s);'
             params = {'user_id': session['user_id'], 'content': tweet}
             try:
                 cursor = g.db.cursor()
@@ -123,7 +123,7 @@ def feed(username):
     # check if given username exists
     cursor = g.db.cursor()
     cursor.execute(
-        'SELECT id FROM twitter_user WHERE username=:username;', {'username': username})
+        'SELECT id FROM twitter_user WHERE username=%(username)s;', {'username': username})
     user = cursor.fetchone()
     if not user:
         return render_template('404.html'), 404
@@ -134,7 +134,7 @@ def feed(username):
         """
         SELECT u.username, u.first_name, u.last_name, t.id, t.created, t.content
         FROM twitter_user AS u JOIN tweet t ON (u.id=t.user_id)
-        WHERE u.username=:username ORDER BY datetime(created) DESC;
+        WHERE u.username=%(username)s ORDER BY datetime(created) DESC;
         """,
         {'username': username})
     tweets = [dict(username=row[0], id=row[3], created=row[4], content=row[5])
@@ -148,12 +148,12 @@ def tweet(tweet_id):
     next = request.args.get('next', '/')
     cursor = g.db.cursor()
     cursor.execute(
-        'SELECT * FROM tweet WHERE id=:tweet_id AND user_id=:user_id;',
+        'SELECT * FROM tweet WHERE id=%(tweet_id)s AND user_id=%(user_id)s;',
         {'tweet_id': tweet_id, 'user_id': session['user_id']})
     if not cursor.fetchone():
         return render_template('404.html'), 404
     cursor.execute(
-        'DELETE FROM tweet WHERE id=:tweet_id AND user_id=:user_id',
+        'DELETE FROM tweet WHERE id=%(tweet_id)s AND user_id=%(user_id)s',
         {'tweet_id': tweet_id, 'user_id': session['user_id']})
     g.db.commit()
     flash('Your tweet was successfully deleted!', 'success')
