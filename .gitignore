@@ -60,6 +60,7 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+.~c9*
 
 *.db
 .DS_Store
