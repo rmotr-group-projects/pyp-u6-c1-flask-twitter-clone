@@ -27,3 +27,37 @@ def login_required(f):
 
 
 # implement your views here
+@app.route('/')
+@login_required
+def index():
+    return ""
+
+@app.route('/login', methods=['POST', 'GET'])
+def login():
+    if request.method == 'GET':
+        if 'username' in session:
+            return redirect('/')
+        else:
+            return render_template('static_templates/login.html')
+    elif request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        params = {
+            'username': username,
+            'password': md5(password.encode('utf-8')).hexdigest()
+        }
+        cursor = g.db.execute('SELECT * FROM user WHERE username = :username AND password = :password;', params)
+        user = cursor.fetchone()
+        if user:
+            session['username'] = username
+            session['user_id'] = user[0]
+        else:
+            return "Invalid username or password", 200
+        return redirect('/')
+        
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    session.pop('user_id', None)
+    return redirect('/')
+        
