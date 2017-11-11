@@ -31,6 +31,32 @@ def login_required(f):
 @login_required
 def index():
     return ""
+    
+@app.route('/<string:username>', methods=['GET', 'POST'])
+def feed(username):
+    
+    if request.method == 'POST':
+        if 'username' not in session:
+            abort(403)
+        
+        content = request.form['tweet']
+        params = {'user_id' : session['user_id'], 'content' : content}
+        cursor = g.db.execute("""
+            INSERT INTO tweet (user_id, content) VALUES
+            (:user_id, :content);
+        """, params)
+        g.db.commit()
+    
+    params = {'username' : username}
+    cursor = g.db.execute("""
+        SELECT t.id, u.username, t.created, t.content
+        FROM tweet t INNER JOIN user u ON t.user_id = u.id
+        WHERE u.username = :username;
+    """, params)
+    tweets = [dict(id=row[0], username=row[1], created=row[2], content=row[3])
+               for row in cursor.fetchall()]
+    
+    return render_template('static_templates/own_feed.html', tweets=tweets)
 
 @app.route('/tweets/<int:tweet_id>/delete', methods=['POST'])
 @login_required
