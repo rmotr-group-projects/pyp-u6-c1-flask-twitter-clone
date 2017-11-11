@@ -3,7 +3,7 @@ from hashlib import md5
 from functools import wraps
 from flask import Flask
 from flask import (g, request, session, redirect, render_template,
-                   flash, url_for)
+                   flash, url_for, abort)
 
 app = Flask(__name__)
 
@@ -31,6 +31,20 @@ def login_required(f):
 @login_required
 def index():
     return ""
+
+@app.route('/tweets/<int:tweet_id>/delete', methods=['POST'])
+@login_required
+def tweets(tweet_id):
+    params = {'id' : tweet_id }
+    
+    cursor = g.db.execute('SELECT * FROM tweet WHERE id = :id;', params)
+    tweet = cursor.fetchone()
+    if not tweet:
+        abort(404)
+    
+    g.db.execute('DELETE FROM tweet WHERE id = :id;', params)
+    g.db.commit()
+    return redirect('/')
     
 @app.route('/profile', methods=['POST', 'GET'])
 @login_required
