@@ -31,6 +31,24 @@ def login_required(f):
 @login_required
 def index():
     return ""
+    
+@app.route('/profile', methods=['POST', 'GET'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        first_name = request.form['first_name'].strip()
+        last_name = request.form['last_name'].strip()
+        birth_date = request.form['birth_date'].strip()
+        params = {
+            'id': session['user_id'],
+            'first_name': first_name,
+            'last_name' : last_name,
+            'birth_date' :birth_date
+        }
+        g.db.execute('UPDATE user SET first_name = :first_name, last_name = :last_name, birth_date = date(:birth_date) WHERE id = :id;', params)
+        g.db.commit()
+        
+    return render_template('static_templates/profile.html')   
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
